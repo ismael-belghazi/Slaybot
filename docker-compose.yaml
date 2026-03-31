@@ -1,19 +1,41 @@
 version: "3.9"
 
+# =============================================================================
+# SERVICES DE COMPILATION DOCKER
+# =============================================================================
 services:
   kivy-apk:
     build: .
     container_name: kivy-builder
-    restart: unless-stopped
-
+    
+    # Sécurité : On utilise un utilisateur non-root pour éviter de corrompre 
+    # les permissions des fichiers sur la machine hôte.
+    user: "buildozer"
+    
     volumes:
+      # Montage du code source : Toute modification dans ce dossier sur l'hôte 
+      # est immédiatement visible dans le conteneur.
       - .:/home/buildozer/app
+      
+      # PERSISTANCE : Ces volumes nommés évitent de retélécharger les 4Go du 
+      # SDK Android et du NDK à chaque lancement du conteneur.
       - buildozer-cache:/home/buildozer/.buildozer
       - gradle-cache:/home/buildozer/.gradle
-
+      
+    # INTERACTIVITÉ : Permet de répondre aux licences Android (y/n) 
+    # directement dans le terminal.
     stdin_open: true
     tty: true
+    
+    # COMMANDE : Lance la compilation en mode debug par défaut. 
+    # Pour passer en release, on peut surcharger cette commande au lancement.
+    command: buildozer android debug
 
+# =============================================================================
+# VOLUMES PERSISTANTS
+# =============================================================================
 volumes:
+  # Stocke les outils de build (SDK, NDK, Recettes Python)
   buildozer-cache:
+  # Stocke les dépendances Java et le cache de compilation Gradle
   gradle-cache:

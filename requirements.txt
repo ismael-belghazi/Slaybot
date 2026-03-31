@@ -1,2 +1,9 @@
+# spécifie les dépendances Python nécessaires pour le projet
 kivy
+kivymd
 pyserial
+websocket-client
+# pour l'interface graphique de la simulation
+PyQt5
+pyqtgraph
+qasync
