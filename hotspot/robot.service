@@ -1,0 +1,23 @@
+[Unit]
+Description=Cerveau du Robot et Hotspot
+# On attend que le réseau soit géré par le système
+After=network.target NetworkManager.service
+
+[Service]
+Type=simple
+User=admin
+Group=admin
+WorkingDirectory=/home/admin/Documents/hotspot/
+
+
+ExecStartPre=/bin/bash -c 'until ip addr show wlan0 | grep -q "inet "; do sleep 2; done'
+
+ExecStart=/home/admin/Documents/hotspot/venv/bin/python3 -u /home/admin/Documents/hotspot/serveur_cerveau.py
+
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -25,7 +25,7 @@ class RobotAPI:
     ws = None
     online = False
     callback = None
-    robot_ip = "127.0.0.1"
+    robot_ip = "10.42.0.1"
     port = 8765
 
     @staticmethod
