@@ -1,115 +1,92 @@
+# MASTER README - SlayBot Ecosystem
 
-# Robot-Server & RSapp
+> Ce document centralise la documentation de l'ensemble du projet **SlayBot**, un système robotique complet pour le service en restaurant. Le projet est divisé en cinq modules interconnectés communiquant en temps réel via WebSockets.
 
-Ce projet est un système complet de gestion pour un **robot de service en restaurant**. Il comprend une application mobile de commande (**RSapp**) développée avec **Kivy** et un simulateur de trajectoire visuel développé avec **PyQt5**. L'ensemble communique en temps réel via le protocole **WebSocket**.
 
-## Sommaire
+## Présentation Générale
 
-* [Aperçu du système](#aperçu-du-système)
-* [Installation et Dépendances](#installation-et-dépendances)
-* [Le Simulateur (Serveur PC)](#le-simulateur-serveur-pc)
-* [L’Application Mobile (Client Android)](#lapplication-mobile-client-android)
-* [Compilation de l’APK (Buildozer)](#compilation-de-lapk-buildozer)
-* [Protocole de Communication](#protocole-de-communication)
-* [Architecture du Projet](#architecture-du-projet)
+>SlayBot est une solution de service automatisée comprenant :
+1.  **Le Cerveau (Hotspot)** : Un Raspberry Pi central gérant le réseau et la logique.
+2.  **L'Interface Mobile (APK)** : Une application pour envoyer le robot en mission.
+3.  **L'Interface Robot (Screen)** : Un écran tactile affichant le visage et les interactions du robot.
+4.  **Les Modules Table** : Des boîtiers ESP32 permettant aux clients d'appeler le robot.
+5.  **Le Simulateur** : Un outil PC pour tester la logique sans matériel physique.
 
----
 
-## Aperçu du système
+## 1. Slaybot APK (Application de Commande)
 
-1.  **Le Serveur (PC/Simulateur)** : Centralise les commandes, gère la file d'attente des livraisons et simule visuellement le déplacement du robot sur un plan (Tables T1 à T4 et le Bar).
-2.  **Le Client (Smartphone Android)** : Interface utilisateur permettant d'envoyer le robot vers une table spécifique ou de déclencher un arrêt d'urgence.
-3.  **Communication** : Flux bidirectionnel. Le client envoie des ordres (`go/T1`), le serveur renvoie des confirmations d'état (`arrived/table/1`).
+>Situé dans le dossier `slaybot_apk`, ce module est l'interface de pilotage pour le personnel.
 
----
+* **Technologie** : Python / Kivy.
+* **Fonctions** : Connexion à l'IP du cerveau, envoi du robot aux tables 1 à 4, arrêt d'urgence.
+* **Compilation** : Utilise Buildozer via Docker pour générer l'APK Android (API 33).
+* **Commande de build** : docker compose run --rm kivy-apk buildozer android debug.
 
-## Installation et Dépendances
 
-### Configuration du PC (Simulateur)
-Le simulateur nécessite Python 3.10+ et les bibliothèques suivantes :
-* **PyQt5** : Pour l'interface graphique et le rendu 2D du robot.
-* **websockets** : Pour la gestion du serveur de communication.
-* **asyncio** : Pour le traitement asynchrone des messages.
+## 2. Slaybot Hotspot (Le Cerveau Central)
 
-Installation rapide :
-`pip install PyQt5 websockets`
+>Situé dans le dossier `slaybot_hotspot`, c'est le centre nerveux installé sur une Raspberry Pi.
 
-### Configuration Mobile (Application)
-L'application est compilée pour Android, mais pour le développement local, elle nécessite :
-* **Kivy** : Framework de l'interface utilisateur.
-* **websocket-client** : Pour la connexion au serveur.
-* **requests** : Pour les appels API complémentaires.
+* **Réseau** : Crée un Wi-Fi privé nommé Slaybot (IP 10.42.0.1).
+* **Serveur** : Gère un serveur WebSocket sur le port 8765.
+* **Installation** : Script install.sh automatisé pour configurer NetworkManager et le service robot.service.
+* **Fiche Technique** : SSID : Slaybot | MDP : MHI-Hotspot | Port : 8765.
 
----
 
-## Le Simulateur (Serveur PC)
 
-Le simulateur joue le rôle de "cerveau" du robot. Il affiche une carte avec 4 tables et une zone de bar.
+## 3. Slaybot Screen (Interface Visuelle)
 
-**Lancement :**
-`python simulation.py`
+>Situé dans le dossier `slaybot_screen`, ce module gère l'écran fixé sur le robot.
 
-**Fonctionnalités clés :**
-* **Auto-détection IP** : Le serveur identifie automatiquement l'IP locale du PC (ex: 192.168.1.x) pour permettre la connexion du smartphone.
-* **Gestion de file d'attente** : Si plusieurs tables sont demandées, le robot les traite l'une après l'autre.
-* **Validation de livraison** : À l'arrivée à une table, une fenêtre surgissante (Popup) demande la validation manuelle avant que le robot ne retourne au bar.
-* **Retour intelligent** : Le robot emprunte le chemin inverse exact pour revenir à sa base.
+* **Technologie** : Python / Tkinter.
+* **Visage Dynamique** : Affiche des expressions (Heureux, Étonné, Erreur) selon l'état du trajet.
+* **Interaction** : Bouton vert de confirmation de réception et bouton rouge d'arrêt d'urgence.
+* **Auto-Run** : Configuré via un service systemd pour se lancer au démarrage de l'écran.
 
----
 
-## L’Application Mobile (Client Android)
 
-L'interface **RSapp** permet au personnel de salle de piloter le robot à distance.
+## 4. Slaybot Table (Appel Client)
 
-**Fonctions disponibles :**
-* **Connexion IP** : Saisie de l'adresse IP affichée sur le simulateur.
-* **Contrôle de destination** : Boutons dédiés pour envoyer le robot aux tables 1, 2, 3 ou 4.
-* **Statut en direct** : Affichage des messages de retour (ex: "Robot en route vers T1", "Livraison arrivée").
-* **Arrêt d'urgence** : Bouton prioritaire pour stopper immédiatement tous les mouvements.
+>Situé dans le dossier `slaybot_table`, ce code équipe les modules ESP32 sur chaque table.
 
----
+* **Technologie** : MicroPython.
+* **Matériel** : ESP32 + Bouton poussoir + LED Verte (Prêt) + LED Jaune (Occupé).
+* **Logique** : Envoie une requête d'appel au cerveau. Gère un cooldown de 20 secondes après chaque mission pour éviter les doublons.
+* **Câblage** : Bouton (GPIO 4), LED Verte (GPIO 18), LED Jaune (GPIO 19).
 
-## Compilation de l’APK (Buildozer)
 
-La génération de l'application Android utilise **Buildozer**. La configuration est optimisée pour les versions récentes d'Android (API 33).
+## 5. Slaybot Utilitaires (Développement & Tests)
 
-### Détails du Build (buildozer.spec)
-* **SDK Cible** : Android 13 (API 33).
-* **NDK** : 25b.
-* **Architectures** : arm64-v8a (64-bit) et armeabi-v7a (32-bit).
-* **Exigences critiques** : `python3, kivy, openssl, websocket-client, requests`.
+>Situé dans le dossier `slaybot_utilitaire_dev`, cet outil permet de simuler le comportement du robot sur PC.
 
-### Commandes de génération
-`buildozer android debug`
+* **Technologie** : Python / PyQt5.
+* **Simulation 2D** : Visualise le robot se déplaçant entre le Bar et les Tables sur un plan réel.
+* **Test Réseau** : Simule le serveur central, permettant de connecter l'APK ou les ESP32 directement à votre ordinateur pour débogage.
+* **Lancement** : python simulateur_robot.py.
 
-*Note : La première compilation télécharge et compile OpenSSL, ce qui peut prendre environ 20 minutes.*
 
----
+## Protocole de Communication Global
 
-## Protocole de Communication
+>Tous les modules utilisent des messages texte ou JSON via WebSocket pour échanger des informations :
 
-Les échanges se font par chaînes de caractères simples via WebSocket :
+### Commandes (Sortie)
+* go/X : Envoie le robot à la table X (depuis l'APK ou le Simulateur).
+* order/table/X : Requête d'appel depuis une table client (ESP32).
+* emergency : Arrêt immédiat de tous les systèmes.
 
-* **Client → Serveur** :
-  -  `go/1` à `go/4` : Envoie le robot à une table.
-  - `emergency` : Vide la file d'attente et stoppe le mouvement.
+### Retours d'état (Entrée)
+* arrived/table/X : Le robot est arrivé à destination.
+* arrived/bar : Le robot est revenu à sa base.
+* validated/X : La commande a été récupérée par le client.
 
-* **Serveur → Client** :
-  - `arrived/table/X` : Notifie que le robot est devant la table.
-  - `validated/X` : Confirme que la commande a été récupérée.
-  - `arrived/bar` : Notifie que le robot est revenu à sa base.
 
----
+## Architecture des Dossiers
 
-## Architecture du Projet
+/ (Racine du Projet)
+├── slaybot_apk/          # Code Kivy et Buildozer
+├── slaybot_hotspot/      # Configuration Serveur et Wi-Fi RPi
+├── slaybot_screen/       # Interface graphique du visage
+├── slaybot_table/        # Code MicroPython pour ESP32
+└── slaybot_utilitaire_dev/ # Simulateur PyQt5 de test
 
-* **main.py** : Code source de l'application mobile Kivy.
-* **simulation.py** : Code source du simulateur PyQt5 et du serveur WebSocket.
-* **buildozer.spec** : Fichier de configuration pour la compilation Android.
----
-
-## Améliorations possibles
-
-* **Évitement d'obstacles** : Intégration de capteurs simulés sur le tracé.
-* **Multi-robots** : Gestion de plusieurs instances de robots sur le même plan.
-* **Base de données** : Historique des temps de livraison et statistiques de service.
+SlayBot Project - 2026 ©
