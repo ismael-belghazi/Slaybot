@@ -1,41 +1,31 @@
 version: "3.9"
 
-# =============================================================================
-# SERVICES DE COMPILATION DOCKER
-# =============================================================================
 services:
   kivy-apk:
-    build: .
+    build: 
+      context: ./slaybot_apk
+      dockerfile: Dockerfile
     container_name: kivy-builder
-    
-    # Sécurité : On utilise un utilisateur non-root pour éviter de corrompre 
-    # les permissions des fichiers sur la machine hôte.
     user: "buildozer"
     
     volumes:
-      # Montage du code source : Toute modification dans ce dossier sur l'hôte 
-      # est immédiatement visible dans le conteneur.
-      - .:/home/buildozer/app
+      # Code source : On monte uniquement le sous-dossier
+      - ./slaybot_apk:/home/buildozer/app
       
-      # PERSISTANCE : Ces volumes nommés évitent de retélécharger les 4Go du 
-      # SDK Android et du NDK à chaque lancement du conteneur.
+      # SORTIES : On utilise le point "." pour dire "ici, à la racine"
+      # On force le montage DIRECTEMENT sur les dossiers de sortie du conteneur
+      - ./bin:/home/buildozer/app/bin
+      - ./.buildozer:/home/buildozer/app/.buildozer
+      
+      # Volumes nommés (cachés par Docker pour le SDK/NDK)
       - buildozer-cache:/home/buildozer/.buildozer
       - gradle-cache:/home/buildozer/.gradle
       
-    # INTERACTIVITÉ : Permet de répondre aux licences Android (y/n) 
-    # directement dans le terminal.
     stdin_open: true
     tty: true
-    
-    # COMMANDE : Lance la compilation en mode debug par défaut. 
-    # Pour passer en release, on peut surcharger cette commande au lancement.
+    working_dir: /home/buildozer/app
     command: buildozer android debug
 
-# =============================================================================
-# VOLUMES PERSISTANTS
-# =============================================================================
 volumes:
-  # Stocke les outils de build (SDK, NDK, Recettes Python)
   buildozer-cache:
-  # Stocke les dépendances Java et le cache de compilation Gradle
   gradle-cache:

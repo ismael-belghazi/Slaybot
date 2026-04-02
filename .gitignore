@@ -3,6 +3,5 @@ bin
 .venv
 .buildozer
 idee.md
-my-release-key.keystore
 config.json
 .idea
