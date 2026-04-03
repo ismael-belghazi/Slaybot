@@ -5,3 +5,4 @@ bin
 idee.md
 config.json
 .idea
+.env

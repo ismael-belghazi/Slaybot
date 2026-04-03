@@ -25,7 +25,7 @@
 
 >Le module communique avec le serveur central (Raspberry Pi) via WebSockets :
 
-* Sortie (Appel) : Envoie la chaîne de caractères "order/table/X" (où X est l'ID de la table).
+* Sortie (Appel) : Envoie la chaîne de caractères "clean/table/X" (où X est l'ID de la table).
 * Entrée (Retour) : Écoute le message "arrived/bar" pour savoir quand le robot a terminé sa mission et déclencher le cooldown de 20 secondes.
 
 
