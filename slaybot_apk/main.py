@@ -31,23 +31,24 @@ class RobotAPI:
 
         def on_msg(ws, message):
             msg = message.strip().lower()
-            # 1. Réception d'une commande de table (ex: "order/table/1")
-            if "order/table/" in msg:
+            if msg.startswith("order/table/"):
                 table_id = msg.split("/")[-1]
                 if MainScreen.instance:
                     Clock.schedule_once(lambda dt: MainScreen.instance.notify_new_order(table_id))
-            
-            # 2. Le robot signale qu'il est revenu à sa base
-            elif "arrived/bar" in msg:
+            elif msg.startswith("clean/table/"):
+                table_id = msg.split("/")[-1]
+                if MainScreen.instance:
+                    Clock.schedule_once(lambda dt: MainScreen.instance.notify_new_clean(table_id))
+            elif msg == "arrived/bar":
                 if MainScreen.instance:
                     Clock.schedule_once(lambda dt: MainScreen.instance.on_mission_complete())
 
-        def on_open(ws): 
+        def on_open(ws):
             RobotAPI.online = True
             if RobotAPI.callback:
                 Clock.schedule_once(lambda dt: RobotAPI.callback("Connecté"))
 
-        def on_close(ws, x, y): 
+        def on_close(ws, x, y):
             RobotAPI.online = False
             if RobotAPI.callback:
                 Clock.schedule_once(lambda dt: RobotAPI.callback("Déconnecté"))
@@ -70,9 +71,11 @@ class RobotAPI:
 class MainScreen(Screen):
     instance = None
     status = StringProperty("Connexion...")
-    queue = ListProperty([])              # File d'attente du Robot
-    orders_to_prepare = ListProperty([])  # File d'attente Cuisine (Validation)
-    is_busy = False 
+    queue = ListProperty([])              # File du Robot
+    orders_to_prepare = ListProperty([])  # File Cuisine
+    clean_tasks = ListProperty([])        # File Nettoyage
+    is_busy = False
+    active_submenu = None
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -82,25 +85,22 @@ class MainScreen(Screen):
         RobotAPI.callback = self.set_status
         Clock.schedule_interval(self.check_queue, 1)
 
-    def set_status(self, text): 
+    def set_status(self, text):
         self.status = text
 
-    # --- Gestion de la Cuisine (Validation Humaine) ---
+    # --- Gestion Commandes ---
     def notify_new_order(self, table_id):
-        """ Reçu via WebSocket : On demande à l'utilisateur de préparer. """
-        task = f"Table {table_id}"
+        task = f"ORD Table {table_id}"
         if task not in self.orders_to_prepare and task not in self.queue:
             self.orders_to_prepare.append(task)
             self.update_orders_ui()
 
     def validate_order(self, task_name):
-        """ L'utilisateur valide que la commande est prête à partir. """
         if task_name in self.orders_to_prepare:
             self.orders_to_prepare.remove(task_name)
             self.update_orders_ui()
-            # On envoie maintenant dans la file du robot
             table_id = task_name.split()[-1]
-            self.add_to_queue(table_id)
+            self.add_to_queue(table_id, task_type="commande")
 
     def update_orders_ui(self):
         container = self.ids.orders_list
@@ -108,16 +108,43 @@ class MainScreen(Screen):
         for item in self.orders_to_prepare:
             line = BoxLayout(size_hint_y=None, height=dp(50), spacing=dp(10))
             lbl = Label(text=f"[b]{item}[/b]\n[size=12sp]À PRÉPARER[/size]", markup=True, halign='left')
-            btn = Button(text="PRÊT", size_hint_x=None, width=dp(80), 
+            btn = Button(text="PRÊT", size_hint_x=None, width=dp(80),
                          background_normal='', background_color=(0, 0.6, 0.3, 1))
             btn.bind(on_release=lambda x, it=item: self.validate_order(it))
             line.add_widget(lbl)
             line.add_widget(btn)
             container.add_widget(line)
 
-    # --- Gestion du Robot (Livraison) ---
-    def add_to_queue(self, table_id):
-        task = f"Table {table_id}"
+    # --- Gestion Nettoyage ---
+    def notify_new_clean(self, table_id):
+        task = f"CLEAN Table {table_id}"
+        if task not in self.clean_tasks and task not in self.queue:
+            self.clean_tasks.append(task)
+            self.update_clean_ui()
+
+    def validate_clean(self, task_name):
+        if task_name in self.clean_tasks:
+            self.clean_tasks.remove(task_name)
+            self.update_clean_ui()
+            table_id = task_name.split()[-1]
+            self.add_to_queue(table_id, task_type="nettoyage")
+
+    def update_clean_ui(self):
+        container = self.ids.orders_list
+        container.clear_widgets()
+        for item in self.clean_tasks:
+            line = BoxLayout(size_hint_y=None, height=dp(50), spacing=dp(10))
+            lbl = Label(text=f"[b]{item}[/b]\n[size=12sp]À NETTOYER[/size]", markup=True, halign='left')
+            btn = Button(text="PRÊT", size_hint_x=None, width=dp(80),
+                         background_normal='', background_color=(0.8, 0.5, 0.2, 1))
+            btn.bind(on_release=lambda x, it=item: self.validate_clean(it))
+            line.add_widget(lbl)
+            line.add_widget(btn)
+            container.add_widget(line)
+
+    # --- Gestion Queue Robot ---
+    def add_to_queue(self, table_id, task_type="commande"):
+        task = f"ORD Table {table_id}" if task_type=="commande" else f"CLEAN Table {table_id}"
         if task not in self.queue:
             self.queue.append(task)
             self.update_queue_ui()
@@ -135,7 +162,7 @@ class MainScreen(Screen):
         for item in self.queue:
             line = BoxLayout(size_hint_y=None, height=dp(45), spacing=dp(10))
             lbl = Label(text=item, halign='left')
-            btn = Button(text="X", size_hint_x=None, width=dp(45), 
+            btn = Button(text="X", size_hint_x=None, width=dp(45),
                          background_normal='', background_color=(0.8, 0.2, 0.2, 1))
             btn.bind(on_release=lambda x, it=item: self.remove_from_queue(it))
             line.add_widget(lbl)
@@ -151,14 +178,57 @@ class MainScreen(Screen):
 
     def check_queue(self, dt):
         if self.queue and not self.is_busy and RobotAPI.online:
-            next_table = self.queue[0].split()[-1]
-            RobotAPI.send(f"go/{next_table}")
+            next_task = self.queue[0]
+            table_id = next_task.split()[-1]
+            if next_task.startswith("ORD"):
+                RobotAPI.send(f"order/table/{table_id}")
+            elif next_task.startswith("CLEAN"):
+                RobotAPI.send(f"clean/table/{table_id}")
+            else:
+                RobotAPI.send(f"go/{table_id}")
             self.is_busy = True
-            self.status = f"En route : Table {next_table}"
+            self.status = f"En route : Table {table_id}"
 
-    def reconnect(self):
-        RobotAPI.connect()
+    # --- Sous-menus Commande/Nettoyage ---
+    def toggle_submenu(self, task_type):
+        container = self.ids.orders_list
+        container.clear_widgets()
+        self.active_submenu = task_type
+        box = BoxLayout(orientation='vertical', spacing=dp(10), size_hint_y=None)
+        box.height = 0
+        for i in range(1, 5):
+            btn = Button(
+                text=f"Table {i}",
+                size_hint_y=None,
+                height=dp(50),
+                background_normal='',
+                background_color=(0.2, 0.6, 0.3, 1) if task_type=="commande" else (0.8, 0.5, 0.2, 1)
+            )
+            btn.bind(on_release=lambda x, tid=i, ttype=task_type: self.program_table(tid, ttype))
+            box.add_widget(btn)
+            box.height += dp(50) + dp(10)
+        container.add_widget(box)
+        container.height = box.height
 
+    def program_table(self, table_id, task_type):
+        self.add_to_queue(table_id, task_type)
+        self.status = f"Table {table_id} programmée pour {task_type}"
+        self.ids.orders_list.clear_widgets()
+        self.ids.orders_list.height = 0
+        self.active_submenu = None
+
+    # --- Arrêt d'urgence ---
+    def emergency_stop(self):
+        self.queue.clear()
+        self.is_busy = False
+        self.update_queue_ui()
+        self.status = "ARRÊT D'URGENCE ! Retour à la base"
+        if RobotAPI.online:
+            RobotAPI.send("go/bar")
+
+# =============================================================================
+# ÉCRAN DE CONFIGURATION
+# =============================================================================
 class SettingsScreen(Screen):
     def save_config(self, new_ip):
         RobotAPI.robot_ip = new_ip
@@ -167,6 +237,9 @@ class SettingsScreen(Screen):
         RobotAPI.connect()
         self.manager.current = "main"
 
+# =============================================================================
+# APPLICATION
+# =============================================================================
 class RobotApp(App):
     def build(self):
         if os.path.exists(CONFIG_FILE):
@@ -174,11 +247,14 @@ class RobotApp(App):
                 try:
                     data = json.load(f)
                     RobotAPI.robot_ip = data.get("ip", "127.0.0.1")
-                except: pass
+                except:
+                    pass
         RobotAPI.connect()
         return Builder.load_string(KV)
 
-# --- DESIGN KV ---
+# =============================================================================
+# KV DESIGN
+# =============================================================================
 KV = '''
 <StyledButton@Button>:
     background_normal: ''
@@ -208,7 +284,6 @@ ScreenManager:
                 pos: self.pos
                 size: self.size
 
-        # PANNEAU DE COMMANDE (GAUCHE)
         BoxLayout:
             orientation: "vertical"
             padding: dp(20)
@@ -222,25 +297,19 @@ ScreenManager:
                 size_hint_y: None
                 height: dp(50)
 
-            GridLayout:
-                cols: 2
-                spacing: dp(15)
-                StyledButton:
-                    text: "TABLE 1"
-                    background_color: 0.2, 0.4, 0.9, 1
-                    on_press: root.notify_new_order("1")
-                StyledButton:
-                    text: "TABLE 2"
-                    background_color: 0.9, 0.7, 0.1, 1
-                    on_press: root.notify_new_order("2")
-                StyledButton:
-                    text: "TABLE 3"
-                    background_color: 0.8, 0.1, 0.1, 1
-                    on_press: root.notify_new_order("3")
-                StyledButton:
-                    text: "TABLE 4"
-                    background_color: 0.1, 0.7, 0.2, 1
-                    on_press: root.notify_new_order("4")
+            StyledButton:
+                text: "Commande"
+                size_hint_y: None
+                height: dp(50)
+                background_color: 0.2, 0.6, 0.3, 1
+                on_release: root.toggle_submenu("commande")
+
+            StyledButton:
+                text: "Nettoyage"
+                size_hint_y: None
+                height: dp(50)
+                background_color: 0.8, 0.5, 0.2, 1
+                on_release: root.toggle_submenu("nettoyage")
 
             Widget:
                 size_hint_y: 1 
@@ -254,11 +323,14 @@ ScreenManager:
                     background_color: 0.1, 0.5, 0.3, 1
                     on_press: root.reconnect()
                 StyledButton:
+                    text: "ARRÊT"
+                    background_color: 0.8, 0.1, 0.1, 1
+                    on_press: root.emergency_stop()
+                StyledButton:
                     text: "PARAMS"
                     background_color: 0.3, 0.3, 0.3, 1
                     on_press: app.root.current = "settings"
 
-        # PANNEAU DE SUIVI (DROITE)
         BoxLayout:
             orientation: "vertical"
             size_hint_x: 0.55
@@ -273,7 +345,7 @@ ScreenManager:
                     radius: [dp(20), 0, 0, dp(20)]
 
             Label:
-                text: "--- CUISINE ---"
+                text: "--- RECEPTION ---"
                 bold: True
                 color: 1, 0.7, 0, 1
                 size_hint_y: None
@@ -285,7 +357,7 @@ ScreenManager:
                     id: orders_list
                     orientation: "vertical"
                     size_hint_y: None
-                    height: self.minimum_height
+                    height: 0
                     spacing: dp(8)
 
             Widget:

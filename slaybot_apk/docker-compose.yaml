@@ -1,0 +1,7 @@
+version: '3'
+services:
+  kivyapp:
+    build:
+      context: .
+    volumes:
+      - .:/app
