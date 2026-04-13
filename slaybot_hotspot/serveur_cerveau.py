@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import subprocess
+import socket
 
 # --- CONFIGURATION ---
 HOST = "0.0.0.0"
@@ -59,6 +60,21 @@ async def handler(websocket):
                 await broadcast(f"ORD Table {table_id}")
                 print(f"Commande reçue Table {table_id}")
 
+            elif msg.startswith("ready/table/"):
+                table_id = msg.split("/")[-1]
+                await broadcast(f"READY Table {table_id}")
+                print(f"Commande prête Table {table_id}")
+
+            elif msg.startswith("cancel/table/"):
+                table_id = msg.split("/")[-1]
+                await broadcast(f"CANCEL Table {table_id}")
+                print(f"Commande annulée Table {table_id}")
+
+            elif msg.startswith("paid/table/"):
+                table_id = msg.split("/")[-1]
+                await broadcast(f"PAID Table {table_id}")
+                print(f"Paiement confirmé Table {table_id}")
+
     except websockets.exceptions.ConnectionClosed:
         pass
     except Exception as e:
@@ -66,10 +82,22 @@ async def handler(websocket):
     finally:
         clients_actifs.remove(websocket)
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
+    except Exception:
+        return "127.0.0.1"
+    finally:
+        s.close()
+
 async def main():
+    local_ip = get_local_ip()
     print("-------------------------------------------")
     print(f"SERVEUR SLAYBOT EN LIGNE")
-    print(f"IP : {HOST} | Port : {PORT}")
+    print(f"Écoute sur : {HOST}:{PORT}")
+    print(f"Accessible depuis : ws://{local_ip}:{PORT}")
     print("-------------------------------------------")
     
     async with websockets.serve(handler, HOST, PORT):

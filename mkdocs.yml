@@ -1,0 +1,54 @@
+site_name: SlayBot Documentation
+site_description: Documentation complète et générée automatiquement du projet SlayBot
+site_author: SlayBot Team
+repo_name: GitHub/SlayBot
+nav:
+  - Accueil: index.md
+  - Architecture: architecture.md
+  - documentation de deployment: documentation.md
+  - Installation: installation.md
+  - Modules:
+      - site_commande: site_commande.md
+      - slaybot_apk: slaybot_apk.md
+      - slaybot_hotspot: slaybot_hotspot.md
+      - slaybot_screen: slaybot_screen.md
+      - slaybot_table: slaybot_table.md
+      - slaybot_utilitaire_dev: slaybot_utilitaire_dev.md
+  - API: api.md
+  - information: 
+    - Contribution: contributing.md
+    - License: license.md
+    - regle de conduite: code_of_conduct.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - "import sys, os; sys.path.insert(0, os.path.abspath('.'))"
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+theme:
+  name: material
+  language: fr
+  palette:
+    scheme: default
+    primary: indigo
+    accent: teal
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - content.code.copy
+    - content.action.edit
+    - header.autohide
+extra:
+  repo_url: https://github.com/ismael-belghazi/Slaybot
+  edit_uri: ''
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ismael-belghazi/Slaybot

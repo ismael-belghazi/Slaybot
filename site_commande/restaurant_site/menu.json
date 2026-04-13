@@ -1,0 +1,29 @@
+{
+  "entrees": [
+    { "name": "Salade de chèvre chaud", "price": 8, "image": "/static/images/chevre.jpg" },
+    { "name": "Soupe de légumes maison", "price": 6, "image": "/static/images/soupe.jpg" },
+    { "name": "Tartare de saumon", "price": 12, "image": "/static/images/tartare_saumon.jpg" },
+    { "name": "Bruschetta tomate-mozza", "price": 7, "image": "/static/images/bruschetta.jpg" }
+  ],
+  "plats": [
+    { "name": "Steak frites", "price": 18, "image": "/static/images/steak_frites.jpg" },
+    { "name": "Poulet rôti", "price": 16, "image": "/static/images/poulet_roti.jpg" },
+    { "name": "Saumon grillé", "price": 20, "image": "/static/images/saumon_grille.jpg" },
+    { "name": "Risotto aux champignons", "price": 15, "image": "/static/images/risotto.jpg" }
+  ],
+  "desserts": [
+    { "name": "Tiramisu", "price": 7, "image": "/static/images/tiramisu.jpg" },
+    { "name": "Fondant au chocolat", "price": 8, "image": "/static/images/fondant.jpg" },
+    { "name": "Crème brûlée", "price": 7, "image": "/static/images/creme_brulee.jpg" },
+    { "name": "Salade de fruits frais", "price": 6, "image": "/static/images/salade_fruits.jpg" }
+  ],
+  "boissons": [
+    { "name": "Coca-Cola", "price": 3, "image": "/static/images/coca.jpg" },
+    { "name": "Eau", "price": 2, "image": "/static/images/eau.jpg" },
+    { "name": "Jus d'orange", "price": 4, "image": "/static/images/jus_orange.jpg" },
+    { "name": "Ice Tea", "price": 3, "image": "/static/images/icetea.jpg" },
+    { "name": "Café", "price": 2, "image": "/static/images/cafe.jpg" },
+    { "name": "Shiven and the rock", "price": 16, "image": "/static/images/shiven.jpg" },
+    { "name": "Le Slay original", "price": 20, "image": "/static/images/leslay.jpg" }
+  ]
+}

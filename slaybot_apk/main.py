@@ -27,18 +27,38 @@ class RobotAPI:
     @staticmethod
     def connect():
         if RobotAPI.ws:
-            RobotAPI.ws.close()
+            try:
+                RobotAPI.ws.close()
+            except:
+                pass
+
+        RobotAPI.online = False
+        if RobotAPI.callback:
+            Clock.schedule_once(lambda dt: RobotAPI.callback(f"Connexion à {RobotAPI.robot_ip}..."))
 
         def on_msg(ws, message):
-            msg = message.strip().lower()
-            if msg.startswith("order/table/"):
-                table_id = msg.split("/")[-1]
+            raw = message.strip()
+            msg = raw.lower()
+            if msg.startswith("order/table/") or raw.startswith("ORD Table "):
+                table_id = raw.split("/")[-1] if "order/table/" in msg else raw.split()[-1]
                 if MainScreen.instance:
-                    Clock.schedule_once(lambda dt: MainScreen.instance.notify_new_order(table_id))
-            elif msg.startswith("clean/table/"):
-                table_id = msg.split("/")[-1]
+                    Clock.schedule_once(lambda dt, t=table_id: MainScreen.instance.notify_new_order(t))
+            elif msg.startswith("clean/table/") or raw.startswith("CLEAN Table "):
+                table_id = raw.split("/")[-1] if "clean/table/" in msg else raw.split()[-1]
                 if MainScreen.instance:
-                    Clock.schedule_once(lambda dt: MainScreen.instance.notify_new_clean(table_id))
+                    Clock.schedule_once(lambda dt, t=table_id: MainScreen.instance.notify_new_clean(t))
+            elif raw.startswith("CANCEL Table ") or msg.startswith("cancel/table/"):
+                table_id = raw.split()[-1] if raw.startswith("CANCEL Table ") else raw.split("/")[-1]
+                if MainScreen.instance:
+                    Clock.schedule_once(lambda dt, t=table_id: MainScreen.instance.notify_cancel_order(t))
+            elif raw.startswith("READY Table ") or msg.startswith("ready/table/"):
+                table_id = raw.split()[-1] if raw.startswith("READY Table ") else raw.split("/")[-1]
+                if MainScreen.instance:
+                    Clock.schedule_once(lambda dt, t=table_id: MainScreen.instance.notify_order_ready(t))
+            elif raw.startswith("PAID Table ") or msg.startswith("paid/table/"):
+                table_id = raw.split()[-1] if raw.startswith("PAID Table ") else raw.split("/")[-1]
+                if MainScreen.instance:
+                    Clock.schedule_once(lambda dt, t=table_id: MainScreen.instance.notify_payment(t))
             elif msg == "arrived/bar":
                 if MainScreen.instance:
                     Clock.schedule_once(lambda dt: MainScreen.instance.on_mission_complete())
@@ -46,15 +66,20 @@ class RobotAPI:
         def on_open(ws):
             RobotAPI.online = True
             if RobotAPI.callback:
-                Clock.schedule_once(lambda dt: RobotAPI.callback("Connecté"))
+                Clock.schedule_once(lambda dt: RobotAPI.callback(f"Connecté à {RobotAPI.robot_ip}"))
 
         def on_close(ws, x, y):
             RobotAPI.online = False
             if RobotAPI.callback:
                 Clock.schedule_once(lambda dt: RobotAPI.callback("Déconnecté"))
 
+        def on_error(ws, error):
+            RobotAPI.online = False
+            if RobotAPI.callback:
+                Clock.schedule_once(lambda dt: RobotAPI.callback(f"Erreur connexion : {error}"))
+
         uri = f"ws://{RobotAPI.robot_ip}:{RobotAPI.port}"
-        RobotAPI.ws = websocket.WebSocketApp(uri, on_message=on_msg, on_open=on_open, on_close=on_close)
+        RobotAPI.ws = websocket.WebSocketApp(uri, on_message=on_msg, on_open=on_open, on_close=on_close, on_error=on_error)
         threading.Thread(target=RobotAPI.ws.run_forever, daemon=True).start()
 
     @staticmethod
@@ -71,6 +96,7 @@ class RobotAPI:
 class MainScreen(Screen):
     instance = None
     status = StringProperty("Connexion...")
+    connection_info = StringProperty("")
     queue = ListProperty([])              # File du Robot
     orders_to_prepare = ListProperty([])  # File Cuisine
     clean_tasks = ListProperty([])        # File Nettoyage
@@ -83,10 +109,18 @@ class MainScreen(Screen):
 
     def on_enter(self):
         RobotAPI.callback = self.set_status
+        self.connection_info = f"Hotspot: {RobotAPI.robot_ip}:{RobotAPI.port}"
+        if not RobotAPI.online:
+            self.set_status(f"Connexion à {RobotAPI.robot_ip}..." )
         Clock.schedule_interval(self.check_queue, 1)
 
     def set_status(self, text):
         self.status = text
+        self.connection_info = f"Hotspot: {RobotAPI.robot_ip}:{RobotAPI.port}"
+
+    def reconnect(self):
+        self.status = "Tentative de reconnexion..."
+        RobotAPI.connect()
 
     # --- Gestion Commandes ---
     def notify_new_order(self, table_id):
@@ -94,6 +128,22 @@ class MainScreen(Screen):
         if task not in self.orders_to_prepare and task not in self.queue:
             self.orders_to_prepare.append(task)
             self.update_orders_ui()
+
+    def notify_cancel_order(self, table_id):
+        task = f"ORD Table {table_id}"
+        if task in self.orders_to_prepare:
+            self.orders_to_prepare.remove(task)
+            self.update_orders_ui()
+        if task in self.queue:
+            self.queue.remove(task)
+            self.update_queue_ui()
+        self.status = f"Commande annulée Table {table_id}"
+
+    def notify_order_ready(self, table_id):
+        self.status = f"Commande prête Table {table_id}"
+
+    def notify_payment(self, table_id):
+        self.status = f"Paiement confirmé Table {table_id}"
 
     def validate_order(self, task_name):
         if task_name in self.orders_to_prepare:
@@ -114,6 +164,7 @@ class MainScreen(Screen):
             line.add_widget(lbl)
             line.add_widget(btn)
             container.add_widget(line)
+        container.height = max(container.minimum_height, dp(50))
 
     # --- Gestion Nettoyage ---
     def notify_new_clean(self, table_id):
@@ -141,6 +192,7 @@ class MainScreen(Screen):
             line.add_widget(lbl)
             line.add_widget(btn)
             container.add_widget(line)
+        container.height = max(container.minimum_height, dp(50))
 
     # --- Gestion Queue Robot ---
     def add_to_queue(self, table_id, task_type="commande"):
@@ -230,10 +282,17 @@ class MainScreen(Screen):
 # ÉCRAN DE CONFIGURATION
 # =============================================================================
 class SettingsScreen(Screen):
+    def on_pre_enter(self):
+        ip = RobotAPI.robot_ip or "127.0.0.1"
+        self.ids.ip_input.text = ip
+
     def save_config(self, new_ip):
-        RobotAPI.robot_ip = new_ip
+        ip = new_ip.strip()
+        if not ip:
+            return
+        RobotAPI.robot_ip = ip
         with open(CONFIG_FILE, "w") as f:
-            json.dump({"ip": new_ip}, f)
+            json.dump({"ip": ip}, f)
         RobotAPI.connect()
         self.manager.current = "main"
 
@@ -293,9 +352,22 @@ ScreenManager:
                 text: root.status
                 font_size: "22sp"
                 bold: True
-                color: (0, 0.9, 0.5, 1) if "Connecté" in self.text or "route" in self.text else (0.9, 0.2, 0.2, 1)
+                color: (0, 0.4, 0.9, 1) if "Connecté" in self.text or "route" in self.text else (0.9, 0.2, 0.2, 1)
                 size_hint_y: None
                 height: dp(50)
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
+
+            Label:
+                text: root.connection_info
+                font_size: "14sp"
+                color: (0.8, 0.8, 0.9, 1)
+                size_hint_y: None
+                height: dp(24)
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
 
             StyledButton:
                 text: "Commande"

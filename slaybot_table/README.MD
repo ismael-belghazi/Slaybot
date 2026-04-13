@@ -1,49 +1,42 @@
-# README - SlayBot Table Client (ESP32)
+# slaybot_table
 
-> Ce dépôt contient le code MicroPython destiné aux modules installés sur les tables des clients. Ce système permet d'appeler le robot via un bouton physique et de suivre l'état de la demande grâce à un retour visuel par LEDs.
+Le module `slaybot_table` réunit le code MicroPython pour les boutons de table et les retours LEDs.
 
+## Objectif
 
-## Fonctionnalités
+Permettre à un client de table de demander le robot ou le nettoyage, avec un retour visuel immédiat.
 
-* Connexion WiFi Automatique : Se connecte au hotspot Slaybot (10.42.0.1) dès le démarrage.
-* Système d'Appel : Envoie une requête WebSocket au serveur central lors de l'appui sur le bouton.
-* Gestion d'États par LEDs :
-  - LED Verte : Table disponible, prête à appeler le robot.
-  - LED Jaune : Commande en cours ou période de cooldown.
-* Cooldown de Sécurité : Après chaque mission terminée, le module bloque les nouveaux appels pendant 20 secondes pour éviter les doublons.
-* Auto-Réparation : En cas de perte de connexion ou d'erreur critique, l'ESP32 redémarre automatiquement.
+## Fichiers
 
+- `table(esp32)-code-generique.py` : script principal pour l’ESP32.
+- `README.MD` : documentation du module.
 
-## Schéma de Câblage (ESP32)
+## Câblage
 
-* Bouton Poussoir : Connecté entre le GPIO 4 et le GND (Utilise la résistance de Pull-Up interne).
-* LED Verte : Connectée au GPIO 18 (avec résistance de 220 ohms).
-* LED Jaune : Connectée au GPIO 19 (avec résistance de 220 ohms).
+- Bouton : GPIO 4 vers GND.
+- LED verte : GPIO 18.
+- LED jaune : GPIO 19.
 
+## Fonctionnement
 
-## Protocole de Communication
+- Appui sur le bouton : envoi d’un message WebSocket au serveur.
+- LED verte : état prêt.
+- LED jaune : commande en cours ou période de cooldown.
+- Cooldown : 20 secondes après chaque mission.
 
->Le module communique avec le serveur central (Raspberry Pi) via WebSockets :
+## Déploiement
 
-* Sortie (Appel) : Envoie la chaîne de caractères "clean/table/X" (où X est l'ID de la table).
-* Entrée (Retour) : Écoute le message "arrived/bar" pour savoir quand le robot a terminé sa mission et déclencher le cooldown de 20 secondes.
+1. Installer MicroPython sur l’ESP32.
+2. Copier `table(esp32)-code-generique.py` en `main.py`.
+3. Configurer l’identifiant de table si nécessaire.
+4. Redémarrer l’ESP32.
 
+## Protocoles
 
+- Message sortant : `clean/table/X`.
+- Message entrant : `arrived/bar`.
 
-## Installation et Utilisation
+## Conseils
 
-1. Pré-requis : Flasher l'ESP32 avec le firmware MicroPython et installer une bibliothèque client WebSocket (comme micro_websockets).
-2. Configuration : Modifier la variable TABLE_ID dans le code pour identifier chaque table de manière unique (1, 2, 3...).
-3. Transfert : Copier le script sur l'ESP32 en le nommant main.py pour un lancement automatique.
-4. Statut : Au démarrage, les LEDs s'allument selon la réussite de la connexion au serveur central.
-
-
-
-## Maintenance
-
-* WiFi : Si la LED reste éteinte, vérifiez que le hotspot du Raspberry Pi "Cerveau" est bien actif.
-* Logs : Les erreurs et états de connexion sont affichés en temps réel sur le port série (Baud 115200).
-
-
-
-SlayBot Project - 2026 ©
+- Tester la connexion au hotspot SlayBot.
+- Surveiller le port série à 115200 bauds pour les logs.

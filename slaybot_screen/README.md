@@ -1,80 +1,55 @@
-# Ce projet contient l'interface graphique du robot SlayBot. Il s'exécute sur une Raspberry Pi avec écran et communique via WebSockets avec le serveur de contrôle des moteurs.
+# slaybot_screen
 
-### Fonctionnalités
+Le module `slaybot_screen` fournit l’interface graphique embarquée du robot, tournée vers l’affichage d’état et la confirmation de livraison.
 
-- Visage Dynamique : Dessins vectoriels changeant selon l'état du robot (Heureux, Étonné, Erreur).
+## Fichiers
 
-- Bouton Arrêt d'Urgence : Permet de stopper le robot directement depuis l'écran tactile.
+- `face.py` : application principale.
+- `requirements.txt` : dépendances Python.
+- `install.sh` : script d’installation et de configuration.
 
-- Confirmation de Réception : Un bouton vert apparaît uniquement quand le robot est arrivé à la table du client.
+## Fonctionnalités
 
-- Auto-Run : Le script se lance automatiquement au démarrage grâce à un service système (systemd).
+- Visage animé selon l’état du robot.
+- Bouton vert de confirmation visible après arrivée à la table.
+- Bouton rouge d’arrêt d’urgence.
+- Reconnexion automatique à chaque perte de connexion.
 
-- Installation Automatisée : Un script bash gère l'installation des dépendances et la configuration.
+## Connexion
 
-### Structure du projet
+Le module se connecte à l’adresse WebSocket :
 
-- face.py : Code principal de l'interface (Tkinter + WebSockets).
-
-- requirements.txt : Liste des dépendances Python nécessaires.
- 
-- install.sh : Script d'installation et de configuration de l'auto-run.
-
-### Installation
-- Déposez les fichiers dans le dossier /home/pi/slaybot sur la Raspberry Pi.
-
-- Ouvrez un terminal dans ce dossier.
-
-- Rendez le script d'installation exécutable :
-```bash
-chmod +x install.sh
-```
-- Lancez l'installation :
-```bash
-./install.sh
+```python
+ws://10.42.0.1:8765
 ```
 
-- Redémarrez l'appareil :
+### Messages reçus
+
+- `deplacement table X` : passage à l’état livraison.
+- `arrived/table` : activation du bouton de confirmation.
+- `arrived/bar` : retour en état prêt.
+
+### Messages envoyés
+
+- `status/received` : confirmation de livraison.
+- `status/emergency_stop` : arrêt d’urgence.
+
+## Lancement
+
+1. Copier les fichiers sur la Raspberry Pi.
+2. Installer les dépendances :
+
 ```bash
-sudo reboot
-``` 
-
-### Configuration Réseau
-- L'adresse IP du serveur maître doit être renseignée dans le fichier face.py à la ligne suivante :
-
->SERVER_IP = "10.42.0.1"
-
-## Communication (Protocole WebSocket)
-- Messages reçus par l'écran (Serveur vers Écran) :
->deplacement table X : Le visage devient jaune (livraison en cours).
-
-- arrived/table : 
->Le visage devient heureux et affiche le bouton de confirmation vert.
-
-- arrived/bar : 
-> Le visage revient à l'état normal (prêt au bar).
-
-### Messages envoyés par l'écran (Écran vers Serveur) :
-- status/received : 
-> Envoyé lors du clic sur le bouton vert de confirmation.
-
-- status/emergency_stop : 
-> Envoyé lors du clic sur le bouton rouge STOP.
-
-### Commandes utiles
-- Vérifier l'état du service auto-run :
-```bash
-sudo systemctl status slaybot_face.service
+pip install -r requirements.txt
 ```
 
-- Arrêter l'interface :
+3. Exécuter :
+
 ```bash
-sudo systemctl stop slaybot_face.service
+python face.py
 ```
 
-- Relancer l'interface :
-```bash
-sudo systemctl start slaybot_face.service
-```
+## Notes
 
-SlayBot Project - 2026 ©
+- Vérifier la variable `SERVER_IP` si le hotspot change d’adresse.
+- Le module doit pouvoir accéder au hotspot local pour rester connecté.
