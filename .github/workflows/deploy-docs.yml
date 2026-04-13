@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - dev-applis
   workflow_dispatch:
 
 jobs:
