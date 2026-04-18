@@ -4,54 +4,99 @@ SlayBot est un projet de service robotisé destiné aux restaurants. Il regroupe
 
 ## Structure du dépôt
 
-- `site_commande/` : application web Flask + SocketIO, dashboard restaurateur, gestion des commandes et passerelle vers le hotspot.
-- `slaybot_apk/` : application mobile Android Kivy pour contrôler le robot et suivre les missions.
-- `slaybot_hotspot/` : configuration Raspberry Pi pour hotspot Wi-Fi SlayBot et serveur WebSocket central.
-- `slaybot_screen/` : interface tactile du robot avec visage animé et gestion des confirmations.
-- `slaybot_table/` : client ESP32 pour les tables, demande le robot et affiche les états via LEDs.
-- `slaybot_utilitaire_dev/` : outils de simulation et de test pour développer sans matériel réel.
+* `site_commande/` : application web Flask + SocketIO, dashboard restaurateur, gestion des commandes et passerelle vers le hotspot.
+* `slaybot_apk/` : application mobile Android Kivy pour contrôler le robot et suivre les missions.
+* `slaybot_hotspot/` : configuration Raspberry Pi pour hotspot Wi-Fi SlayBot et serveur WebSocket central.
+* `slaybot_screen/` : interface tactile du robot avec visage animé et gestion des confirmations.
+* `slaybot_table/` : client ESP32 pour les tables, demande le robot et affiche les états via LEDs.
+* `slaybot_utilitaire_dev/` : outils de simulation et de test pour développer sans matériel réel.
 
-## Documentation générée
 
-Ce dépôt utilise **MkDocs** pour produire une documentation structurée et professionnelle.
+## Installation et environnement Python
 
-### Fichiers associés
+### Version recommandée
 
-- `mkdocs.yml` : configuration du site documentation.
-- `docs/` : pages de documentation utilisées par MkDocs.
-- `.github/workflows/deploy-docs.yml` : workflow GitHub Actions pour déployer automatiquement la documentation sur GitHub Pages.
+Python 3.11 est fortement recommandé pour éviter les problèmes de compilation avec certaines dépendances (notamment Pillow et PyQt5).
 
-## Lancer la documentation localement
 
+### Installation de Python
+
+Installer Python 3.11 puis vérifier la version avec :
 ```bash
-# Installer les dépendances de documentation depuis le venv Windows
-.\.venv\Scripts\python.exe -m pip install -r docs/requirements.txt
-
-# Servir la documentation localement depuis le venv
-.\.venv\Scripts\mkdocs.exe serve
+python --version
 ```
 
-Ouvrez ensuite : `http://127.0.0.1:8000`
+### Création d’un environnement virtuel (venv)
 
-Pour générer le site statique sans le lancer :
+Créer l’environnement :
 
 ```bash
-.\.venv\Scripts\mkdocs.exe build
+py -3.11 -m venv .venv
+
+Activer le venv sous Windows PowerShell :
+
+.venv\Scripts\activate
 ```
 
-## Publier sur GitHub Pages
+### Mise à jour de pip
+```bash
+python -m pip install --upgrade pip
+```
 
-La publication est automatisée par le workflow GitHub Actions présent dans `.github/workflows/deploy-docs.yml`. Il génère la documentation avec MkDocs et la publie sur la branche `gh-pages`.
+### Installation des dépendances
 
-## Points d’attention
+Installer toutes les dépendances du projet avec :
+```bash
+pip install -r requirements.txt
+```
 
-- Chaque module possède son README détaillé en français.
-- La documentation `docs/` couvre la totalité des sous-dossiers et les principaux cas d’usage.
-- Les explications sont conçues pour permettre la compréhension du fonctionnement global sans lire le code source.
+## exemple de lancement
+
+Se placer dans le dossier :
+```bash
+cd slaybot_utilitaire_dev
+```
+- Puis lancer :
+```bash
+python simulation.py
+```
+
+
+## Documentation MkDocs
+
+### Lancer en local
+```bash
+.venv\Scripts\mkdocs.exe serve
+```
+Accès :
+
+[http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+
+### Générer le site statique
+```bash
+.venv\Scripts\mkdocs.exe build
+```
+
+## Déploiement documentation
+
+La documentation est automatiquement déployée via GitHub Actions sur la branche :
+
+gh-pages
+
+
+## Points importants
+
+* Utiliser Python 3.11 uniquement (évite les erreurs de compilation des dépendances)
+* Toujours recréer un venv propre en cas de conflit pip
+* Éviter Python 3.13+ pour ce projet
+* Mettre pip à jour avant installation
+
 
 ## Pour commencer
 
-1. Lisez le README du module que vous souhaitez utiliser.
-2. Utilisez `mkdocs serve` pour vérifier la documentation.
-3. Déployez avec GitHub Actions pour publier la documentation sur GitHub Pages.
+1. Installer Python 3.11
+2. Créer le venv
+3. Installer les dépendances
+5. Lancer MkDocs si nécessaire
 

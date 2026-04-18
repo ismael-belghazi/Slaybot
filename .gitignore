@@ -16,7 +16,7 @@ __pycache__/
 site/
 docs/site/
 .tmp_pkg_download/
-
+qrcodes/*
 # Logs
 *.log
 
