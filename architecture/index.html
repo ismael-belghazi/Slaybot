@@ -1,999 +1,791 @@
 
-<!doctype html>
-<html lang="fr" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-        <meta name="description" content="Documentation complète et générée automatiquement du projet SlayBot">
-      
-      
-        <meta name="author" content="MHI-Inc">
-      
-      
-      
-        <link rel="prev" href="..">
-      
-      
-        <link rel="next" href="../documentation/">
-      
-      <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
-    
-    
-      
-        <title>Architecture - SlayBot Documentation</title>
-      
-    
-    
-      <link rel="stylesheet" href="../assets/stylesheets/main.f79797b0.min.css">
-      
-        
-        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
-      
-      
+<!DOCTYPE html>
 
-    
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
-    
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
-
-    
-    
-    
-  </head>
-  
-  
-    
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
-  
-    
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#architecture-generale-de-slaybot" class="md-skip">
+<html class="no-js" lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation complète et générée automatiquement du projet SlayBot" name="description"/>
+<meta content="MHI-Inc" name="author"/>
+<link href=".." rel="prev"/>
+<link href="../documentation/" rel="next"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.4.2, mkdocs-material-9.0.0" name="generator"/>
+<title>Architecture - SlayBot Documentation</title>
+<link href="../assets/stylesheets/main.f79797b0.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.2505c338.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<link href="../assets/_mkdocstrings.css" rel="stylesheet"/>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="teal" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#architecture-generale-de-slaybot">
           Aller au contenu
         </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-    
-      
-
+</div>
+<div data-md-component="announce">
+</div>
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="En-tête">
-    <a href=".." title="SlayBot Documentation" class="md-header__button md-logo" aria-label="SlayBot Documentation" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
-
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
+<nav aria-label="En-tête" class="md-header__inner md-grid">
+<a aria-label="SlayBot Documentation" class="md-header__button md-logo" data-md-component="logo" href=".." title="SlayBot Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
             SlayBot Documentation
           </span>
-        </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
             
               Architecture
             
           </span>
-        </div>
-      </div>
-    </div>
-    
-    
-    
-      <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Rechercher" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Rechercher" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Effacer" class="md-search__icon md-icon" tabindex="-1" title="Effacer" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
             Initialisation de la recherche
           </div>
-          <ol class="md-search-result__list"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+<ol class="md-search-result__list"></ol>
 </div>
-    
-    
-      <div class="md-header__source">
-        <a href="https://github.com/ismael-belghazi/Slaybot" title="Aller au dépôt" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
-  </div>
-  <div class="md-source__repository">
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/ismael-belghazi/Slaybot" title="Aller au dépôt">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
     GitHub/SlayBot
   </div>
 </a>
-      </div>
-    
-  </nav>
-  
+</div>
+</nav>
 </header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-          
-            
-<nav class="md-tabs" aria-label="Onglets" data-md-component="tabs">
-  <div class="md-tabs__inner md-grid">
-    <ul class="md-tabs__list">
-      
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href=".." class="md-tabs__link">
+<div class="md-container" data-md-component="container">
+<nav aria-label="Onglets" class="md-tabs" data-md-component="tabs">
+<div class="md-tabs__inner md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="..">
       Accueil
     </a>
-  </li>
-
-      
-        
-  
-  
-    
-  
-
-
-  <li class="md-tabs__item">
-    <a href="./" class="md-tabs__link md-tabs__link--active">
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link md-tabs__link--active" href="./">
       Architecture
     </a>
-  </li>
-
-      
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href="../documentation/" class="md-tabs__link">
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../documentation/">
       Documentation de déploiement
     </a>
-  </li>
-
-      
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href="../installation/" class="md-tabs__link">
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../installation/">
       Installation
     </a>
-  </li>
-
-      
-        
-  
-  
-
-
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../site_commande/" class="md-tabs__link">
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../site_commande/">
         Modules
       </a>
-    </li>
-  
-
-      
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href="../api/" class="md-tabs__link">
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../api/">
       API
     </a>
-  </li>
-
-      
-        
-  
-  
-
-
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../contributing/" class="md-tabs__link">
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../contributing/">
         Informations
       </a>
-    </li>
-  
-
-      
-    </ul>
-  </div>
+</li>
+</ul>
+</div>
 </nav>
-          
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-  
-
-
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href=".." title="SlayBot Documentation" class="md-nav__button md-logo" aria-label="SlayBot Documentation" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
-
-    </a>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="SlayBot Documentation" class="md-nav__button md-logo" data-md-component="logo" href=".." title="SlayBot Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
     SlayBot Documentation
   </label>
-  
-    <div class="md-nav__source">
-      <a href="https://github.com/ismael-belghazi/Slaybot" title="Aller au dépôt" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
-  </div>
-  <div class="md-source__repository">
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/ismael-belghazi/Slaybot" title="Aller au dépôt">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
     GitHub/SlayBot
   </div>
 </a>
-    </div>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
         Accueil
       </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
           Architecture
           <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
         Architecture
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
+<nav aria-label="Table des matières" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
       Table des matières
     </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#vue-densemble" class="md-nav__link">
-    Vue d'ensemble
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#uml">
+    UML
   </a>
-  
+<nav aria-label="UML" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#diagramme-de-sequence">
+    Diagramme de SÉQUENCE
+  </a>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#modules-principaux" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#diagramme-detat">
+    Diagramme d'État
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#modules-principaux">
     Modules principaux
   </a>
-  
-    <nav class="md-nav" aria-label="Modules principaux">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-site_commande-application-web" class="md-nav__link">
+<nav aria-label="Modules principaux" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-site_commande-application-web">
     1. site_commande (Application web)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#2-slaybot_apk-application-android" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-slaybot_apk-application-android">
     2. slaybot_apk (Application Android)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#3-slaybot_hotspot-serveur-central" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-slaybot_hotspot-serveur-central">
     3. slaybot_hotspot (Serveur central)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#4-slaybot_screen-interface-robot" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-slaybot_screen-interface-robot">
     4. slaybot_screen (Interface robot)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#5-slaybot_table-table-esp32" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-slaybot_table-table-esp32">
     5. slaybot_table (Table ESP32)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#6-slaybot_utilitaire_dev-simulateur" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-slaybot_utilitaire_dev-simulateur">
     6. slaybot_utilitaire_dev (Simulateur)
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#flux-de-communication-complet" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#flux-de-communication-complet">
     Flux de communication complet
   </a>
-  
-    <nav class="md-nav" aria-label="Flux de communication complet">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#scenario-une-commande-de-la-table-a-la-livraison" class="md-nav__link">
+<nav aria-label="Flux de communication complet" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-une-commande-de-la-table-a-la-livraison">
     Scénario : Une commande de la table à la livraison
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#protocole-websocket" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#protocole-websocket">
     Protocole WebSocket
   </a>
-  
-    <nav class="md-nav" aria-label="Protocole WebSocket">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#messages-standards" class="md-nav__link">
+<nav aria-label="Protocole WebSocket" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#messages-standards">
     Messages standards
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#objectifs-de-conception" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#objectifs-de-conception">
     Objectifs de conception
   </a>
-  
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#notes-de-securite" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#notes-de-securite">
     Notes de sécurité
   </a>
-  
 </li>
-      
-    </ul>
-  
+</ul>
 </nav>
-      
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../documentation/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../documentation/">
         Documentation de déploiement
       </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../installation/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../installation/">
         Installation
       </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5">
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5">
           Modules
           <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Modules" data-md-level="1">
-        <label class="md-nav__title" for="__nav_5">
-          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Modules" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
           Modules
         </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../site_commande/" class="md-nav__link">
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../site_commande/">
         site_commande
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../slaybot_apk/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../slaybot_apk/">
         slaybot_apk
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../slaybot_hotspot/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../slaybot_hotspot/">
         slaybot_hotspot
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../slaybot_screen/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../slaybot_screen/">
         slaybot_screen
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../slaybot_table/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../slaybot_table/">
         slaybot_table
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../slaybot_utilitaire_dev/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../slaybot_utilitaire_dev/">
         slaybot_utilitaire_dev
       </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/" class="md-nav__link">
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../api/">
         API
       </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_7">
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7">
           Informations
           <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Informations" data-md-level="1">
-        <label class="md-nav__title" for="__nav_7">
-          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Informations" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
           Informations
         </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contributing/" class="md-nav__link">
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../contributing/">
         Contribution
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../license/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../license/">
         Licence
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../code_of_conduct/" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../code_of_conduct/">
         Règle de conduite
       </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-  </ul>
+</li>
+</ul>
 </nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table des matières">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table des matières" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
       Table des matières
     </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#vue-densemble" class="md-nav__link">
-    Vue d'ensemble
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#uml">
+    UML
   </a>
-  
+<nav aria-label="UML" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#diagramme-de-sequence">
+    Diagramme de SÉQUENCE
+  </a>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#modules-principaux" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#diagramme-detat">
+    Diagramme d'État
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#modules-principaux">
     Modules principaux
   </a>
-  
-    <nav class="md-nav" aria-label="Modules principaux">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-site_commande-application-web" class="md-nav__link">
+<nav aria-label="Modules principaux" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-site_commande-application-web">
     1. site_commande (Application web)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#2-slaybot_apk-application-android" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-slaybot_apk-application-android">
     2. slaybot_apk (Application Android)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#3-slaybot_hotspot-serveur-central" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-slaybot_hotspot-serveur-central">
     3. slaybot_hotspot (Serveur central)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#4-slaybot_screen-interface-robot" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-slaybot_screen-interface-robot">
     4. slaybot_screen (Interface robot)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#5-slaybot_table-table-esp32" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-slaybot_table-table-esp32">
     5. slaybot_table (Table ESP32)
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#6-slaybot_utilitaire_dev-simulateur" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-slaybot_utilitaire_dev-simulateur">
     6. slaybot_utilitaire_dev (Simulateur)
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#flux-de-communication-complet" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#flux-de-communication-complet">
     Flux de communication complet
   </a>
-  
-    <nav class="md-nav" aria-label="Flux de communication complet">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#scenario-une-commande-de-la-table-a-la-livraison" class="md-nav__link">
+<nav aria-label="Flux de communication complet" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-une-commande-de-la-table-a-la-livraison">
     Scénario : Une commande de la table à la livraison
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#protocole-websocket" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#protocole-websocket">
     Protocole WebSocket
   </a>
-  
-    <nav class="md-nav" aria-label="Protocole WebSocket">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#messages-standards" class="md-nav__link">
+<nav aria-label="Protocole WebSocket" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#messages-standards">
     Messages standards
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#objectifs-de-conception" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#objectifs-de-conception">
     Objectifs de conception
   </a>
-  
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#notes-de-securite" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#notes-de-securite">
     Notes de sécurité
   </a>
-  
 </li>
-      
-    </ul>
-  
+</ul>
 </nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-
-
-<h1 id="architecture-generale-de-slaybot">Architecture générale de SlayBot<a class="headerlink" href="#architecture-generale-de-slaybot" title="Permanent link">&para;</a></h1>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="architecture-generale-de-slaybot">Architecture générale de SlayBot<a class="headerlink" href="#architecture-generale-de-slaybot" title="Permanent link">¶</a></h1>
 <p>SlayBot est un système modulaire de robot de service conçu pour les restaurants. Chaque composant remplit un rôle spécifique et communique en temps réel via WebSocket.</p>
-<h2 id="vue-densemble">Vue d'ensemble<a class="headerlink" href="#vue-densemble" title="Permanent link">&para;</a></h2>
-<pre><code>┌─────────────────────────────────────────────────────────────────┐
-│                    SlayBot System Architecture                  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────┐          ┌──────────────┐                   │
-│  │   WEB        │          │  MOBILE APK  │                   │
-│  │ (Flask/SocketIO)        │  (Kivy)      │                   │
-│  │              │          │              │                   │
-│  └──────────────┘          └──────────────┘                   │
-│         │                        │                             │
-│         └────────────┬───────────┘                             │
-│                      │                                         │
-│         ┌────────────▼───────────┐                            │
-│         │  HOTSPOT (WebSocket) │                     
-│         │  Raspberry Pi Central│
-│         │  (serveur_cerveau.py)│
-│         └────────────┬───────────┘                            │
-│                      │                                         │
-│     ┌────────────────┼────────────────┐                       │
-│     │                │                │                       │
-│  ┌──▼────┐      ┌───▼────┐      ┌───▼────┐                  │
-│  │ROBOT  │      │ ÉCRAN   │      │ TABLE  │                  │
-│  │SCREEN │      │TACTILE  │      │ESP32   │                  │
-│  │(Tkinter)     │(Tkinter)│      │(µPython)                 │
-│  └───────┘      └────────┘      └────────┘                  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-</code></pre>
-<h2 id="modules-principaux">Modules principaux<a class="headerlink" href="#modules-principaux" title="Permanent link">&para;</a></h2>
-<h3 id="1-site_commande-application-web">1. <code>site_commande</code> (Application web)<a class="headerlink" href="#1-site_commande-application-web" title="Permanent link">&para;</a></h3>
+<h2 id="uml">UML<a class="headerlink" href="#uml" title="Permanent link">¶</a></h2>
+<div class="mermaid">classDiagram
+
+%% ===================== CLIENT WEB =====================
+
+class ApplicationWeb {
+  +int idTable
+  +string tokenSession
+  +string statutCommande
+  +creerCommande()
+  +annulerCommande()
+  +payerCommande()
+  +envoyerCommande()
+}
+
+%% ===================== APPLICATION MOBILE =====================
+
+class ApplicationMobile {
+  +List~Commande~ fileCommandes
+  +List~Commande~ fileNettoyage
+  +List~Commande~ fileRobot
+  +bool connecte
+  +recevoirCommande()
+  +validerCommande()
+  +envoyerCommandeRobot()
+  +gererFiles()
+}
+
+class Commande {
+  +int id
+  +int idTable
+  +string type
+  +string statut
+  +datetime heureCreation
+}
+
+%% ===================== TABLE =====================
+
+class TableESP32 {
+  +bool disponible
+  +int cooldownSecondes
+  +bool boutonAppuye
+  +string etatLED
+  +demanderNettoyage()
+  +mettreAJourLED()
+}
+
+%% ===================== CŒUR SYSTÈME =====================
+
+class ServeurHotspot {
+  +List connexionsActives
+  +Dict etatSysteme
+  +Queue messages
+  +validerMessage()
+  +routerEvenement()
+  +diffuser()
+}
+
+%% ===================== ROBOT =====================
+
+class Robot {
+  +string position
+  +string etat
+  +int batterie
+  +deplacerVers()
+  +retourBase()
+  +arretUrgence()
+}
+
+class EcranRobot {
+  +string etatAffichage
+  +bool confirmationReçue
+  +afficherEtat()
+  +envoyerConfirmation()
+  +alerteUrgence()
+}
+
+%% ===================== SIMULATEUR =====================
+
+class Simulateur {
+  +simulerTrajet()
+  +genererEvenements()
+}
+
+%% ===================== RELATIONS + CARDINALITÉS =====================
+
+%% Web → Serveur
+ApplicationWeb "1" --&gt; "1" ServeurHotspot : connecte
+
+%% Mobile → Serveur
+ApplicationMobile "1..*" --&gt; "1" ServeurHotspot : websocket
+
+%% Table → Serveur
+TableESP32 "1..*" --&gt; "1" ServeurHotspot : connexion
+
+%% Commandes
+ApplicationWeb "1" --&gt; "0..*" Commande : crée
+ApplicationMobile "1" --&gt; "0..*" Commande : traite
+
+%% Serveur distribue
+ServeurHotspot "1" --&gt; "1..*" ApplicationMobile : diffuse événements
+ServeurHotspot "1" --&gt; "1" Robot : contrôle
+ServeurHotspot "1" --&gt; "1" EcranRobot : état
+ServeurHotspot "1" --&gt; "1..*" TableESP32 : met à jour
+
+%% Robot UI
+Robot "1" --&gt; "1" EcranRobot : synchronisation
+</div>
+<h3 id="diagramme-de-sequence">Diagramme de SÉQUENCE<a class="headerlink" href="#diagramme-de-sequence" title="Permanent link">¶</a></h3>
+<div class="mermaid">sequenceDiagram
+title SlayBot Order Flow
+
+participant Client
+participant WebApp as Web Application
+participant Hotspot as Hotspot Server
+participant Mobile as Mobile Application
+participant Robot
+participant Screen as Robot Screen
+participant Table as Table Device
+
+%% ================= ORDER CREATION =================
+Client-&gt;&gt;WebApp: Select menu and table
+WebApp-&gt;&gt;Hotspot: Send order request
+
+Note over WebApp,Hotspot: ORDER EVENT - creation phase
+
+%% ================= ORDER VALIDATION =================
+Hotspot-&gt;&gt;Mobile: Notify new order
+Mobile-&gt;&gt;Mobile: Add to order queue
+
+alt Order validated
+    Note over Mobile,Hotspot: VALIDATION PHASE
+
+    Mobile-&gt;&gt;Hotspot: Validate and dispatch to table
+    Hotspot-&gt;&gt;Robot: Move to table
+
+    Robot-&gt;&gt;Hotspot: Arrived at table
+    Hotspot-&gt;&gt;Screen: Display arrival status
+    Screen-&gt;&gt;Client: Show confirmation button
+
+    opt Client confirms receipt
+        Client-&gt;&gt;Screen: Confirm delivery received
+        Screen-&gt;&gt;Hotspot: Send confirmation status
+        Hotspot-&gt;&gt;Mobile: Order completed
+    end
+
+    Mobile-&gt;&gt;Hotspot: Return to bar
+    Hotspot-&gt;&gt;Robot: Move to bar
+    Robot-&gt;&gt;Hotspot: Arrived at bar
+    Hotspot-&gt;&gt;Screen: Display ready status
+
+else Order cancelled
+    Note over Mobile,WebApp: CANCEL FLOW
+
+    Mobile-&gt;&gt;Hotspot: Cancel order
+    Hotspot-&gt;&gt;WebApp: Notify cancellation
+end
+
+%% ================= PARALLEL SERVICES =================
+par Cleaning request
+    Table-&gt;&gt;Hotspot: Request cleaning service
+    Note over Table,Hotspot: MAINTENANCE FLOW
+    Hotspot-&gt;&gt;Mobile: Add to cleaning queue
+and Payment processing
+    WebApp-&gt;&gt;Hotspot: Process payment
+    Note over WebApp,Table: FINANCIAL FLOW
+    Hotspot-&gt;&gt;Table: Update LED to available
+end
+</div>
+<h3 id="diagramme-detat">Diagramme d'État<a class="headerlink" href="#diagramme-detat" title="Permanent link">¶</a></h3>
+<div class="mermaid">
+stateDiagram-v2
+
+[*] --&gt; EN_ATTENTE
+
+EN_ATTENTE --&gt; COMMANDE_RECUE : nouvelle commande
+
+COMMANDE_RECUE --&gt; EN_ROUTE_TABLE : validation OK
+EN_ROUTE_TABLE --&gt; ATTENTE_CONFIRMATION : arrivé table
+
+ATTENTE_CONFIRMATION --&gt; RETOUR_BAR : confirmé client
+RETOUR_BAR --&gt; EN_ATTENTE : arrivé bar
+
+EN_ATTENTE --&gt; NETTOYAGE : demande ESP32
+NETTOYAGE --&gt; RETOUR_BAR : nettoyage terminé
+
+EN_ATTENTE --&gt; ARRET_URGENCE : bouton urgence
+ARRET_URGENCE --&gt; EN_ATTENTE : reset système
+</div>
+<h2 id="modules-principaux">Modules principaux<a class="headerlink" href="#modules-principaux" title="Permanent link">¶</a></h2>
+<h3 id="1-site_commande-application-web">1. <code>site_commande</code> (Application web)<a class="headerlink" href="#1-site_commande-application-web" title="Permanent link">¶</a></h3>
 <p><strong>Responsabilité</strong> : Gestion des commandes clients et dashboard restaurateur.</p>
 <p><strong>Technologie</strong> : Flask + SocketIO + PostgreSQL</p>
-<p><strong>Fonctionnalités</strong> :
-- Interface client pour sélectionner une table et un menu.
-- Dashboard restaurateur pour valider/annuler/payer les commandes.
-- Gestion automatique des tokens de table.
-- Connexion WebSocket au hotspot pour l'envoi des ordres.</p>
-<p><strong>Les points clés</strong> :
-- Un token = une session de table.
-- Les ordres sont validés par le restaurateur avant transmission au robot.
-- Le paiement libère la table et invalide tous ses tokens.</p>
-<h3 id="2-slaybot_apk-application-android">2. <code>slaybot_apk</code> (Application Android)<a class="headerlink" href="#2-slaybot_apk-application-android" title="Permanent link">&para;</a></h3>
+<p><strong>Fonctionnalités</strong> :</p>
+<ul>
+<li>Interface client pour sélectionner une table et un menu.</li>
+<li>Dashboard restaurateur pour valider/annuler/payer les commandes.</li>
+<li>Gestion automatique des tokens de table.</li>
+<li>Connexion WebSocket au hotspot pour l'envoi des ordres.</li>
+</ul>
+<p><strong>Les points clés</strong> :</p>
+<ul>
+<li>Un token = une session de table.</li>
+<li>Les ordres sont validés par le restaurateur avant transmission au robot.</li>
+<li>Le paiement libère la table et invalide tous ses tokens.</li>
+</ul>
+<hr/>
+<h3 id="2-slaybot_apk-application-android">2. <code>slaybot_apk</code> (Application Android)<a class="headerlink" href="#2-slaybot_apk-application-android" title="Permanent link">¶</a></h3>
 <p><strong>Responsabilité</strong> : Réception des ordres et gestion de la file d'attente robot.</p>
 <p><strong>Technologie</strong> : Kivy + WebSocket client</p>
-<p><strong>Fonctionnalités</strong> :
-- Affichage des commandes reçues du hotspot.
-- Gestion de trois files : ordres, nettoyage, file robot.
-- Envoi des commandes au hotspot pour exécution.
-- Statut visuel : connexion, occupation, complétion.</p>
-<p><strong>Les points clés</strong> :
-- L'APK ne décide pas ; elle transmet les ordres validés par le restaurateur.
-- La file robot est gérée localement par l'APK.
-- Reconnexion automatique en cas de perte de connexion.</p>
-<h3 id="3-slaybot_hotspot-serveur-central">3. <code>slaybot_hotspot</code> (Serveur central)<a class="headerlink" href="#3-slaybot_hotspot-serveur-central" title="Permanent link">&para;</a></h3>
+<p><strong>Fonctionnalités</strong> :</p>
+<ul>
+<li>Affichage des commandes reçues du hotspot.</li>
+<li>Gestion de trois files : ordres, nettoyage, file robot.</li>
+<li>Envoi des commandes au hotspot pour exécution.</li>
+<li>Statut visuel : connexion, occupation, complétion.</li>
+</ul>
+<p><strong>Les points clés</strong> :</p>
+<ul>
+<li>L'APK ne décide pas ; elle transmet les ordres validés par le restaurateur.</li>
+<li>La file robot est gérée localement par l'APK.</li>
+<li>Reconnexion automatique en cas de perte de connexion.</li>
+</ul>
+<hr/>
+<h3 id="3-slaybot_hotspot-serveur-central">3. <code>slaybot_hotspot</code> (Serveur central)<a class="headerlink" href="#3-slaybot_hotspot-serveur-central" title="Permanent link">¶</a></h3>
 <p><strong>Responsabilité</strong> : Relais central et dispatcher des commandes.</p>
-<p><strong>Technologie</strong> : Python asyncio + websockets</p>
-<p><strong>Fonctionnalités</strong> :
-- Serveur WebSocket sur <code>0.0.0.0:8765</code>.
-- Diffusion des messages à tous les clients connectés.
-- Traitement des commandes métier (order, clean, cancel, paid).
-- Gestion du hotspot Wi-Fi local (10.42.0.1).</p>
-<p><strong>Les points clés</strong> :
-- Le hotspot est le point unique de convergence.
-- Tous les messages sont relayés à tous les clients.
-- Aucune logique métier (juste du relais d'événements).</p>
-<h3 id="4-slaybot_screen-interface-robot">4. <code>slaybot_screen</code> (Interface robot)<a class="headerlink" href="#4-slaybot_screen-interface-robot" title="Permanent link">&para;</a></h3>
+<p><strong>Technologie</strong> : Python asyncio + WebSockets</p>
+<p><strong>Fonctionnalités</strong> :</p>
+<ul>
+<li>Serveur WebSocket sur <code>0.0.0.0:8765</code>.</li>
+<li>Diffusion des messages à tous les clients connectés.</li>
+<li>Traitement des commandes métier (order, clean, cancel, paid).</li>
+<li>Gestion du hotspot Wi-Fi local (10.42.0.1).</li>
+</ul>
+<p><strong>Les points clés</strong> :</p>
+<ul>
+<li>Le hotspot est le point unique de convergence.</li>
+<li>Tous les messages sont relayés à tous les clients.</li>
+<li>Aucune logique métier (juste du relais d'événements).</li>
+</ul>
+<hr/>
+<h3 id="4-slaybot_screen-interface-robot">4. <code>slaybot_screen</code> (Interface robot)<a class="headerlink" href="#4-slaybot_screen-interface-robot" title="Permanent link">¶</a></h3>
 <p><strong>Responsabilité</strong> : Affichage visuel embarqué du robot.</p>
 <p><strong>Technologie</strong> : Tkinter + WebSocket client</p>
-<p><strong>Fonctionnalités</strong> :
-- Visage animé selon l'état du robot.
-- Confirmation de livraison (bouton visible à table).
-- Arrêt d'urgence disponible en permanence.
-- Reconnexion automatique.</p>
-<p><strong>Les points clés</strong> :
-- L'écran suit passivement l'état du robot.
-- Il ne prend aucune décision métier (juste de l'affichage).
-- Les interactions (confirmation, urgence) sont envoyées au hotspot.</p>
-<h3 id="5-slaybot_table-table-esp32">5. <code>slaybot_table</code> (Table ESP32)<a class="headerlink" href="#5-slaybot_table-table-esp32" title="Permanent link">&para;</a></h3>
+<p><strong>Fonctionnalités</strong> :</p>
+<ul>
+<li>Visage animé selon l'état du robot.</li>
+<li>Confirmation de livraison (bouton visible à table).</li>
+<li>Arrêt d'urgence disponible en permanence.</li>
+<li>Reconnexion automatique.</li>
+</ul>
+<p><strong>Les points clés</strong> :</p>
+<ul>
+<li>L'écran suit passivement l'état du robot.</li>
+<li>Il ne prend aucune décision métier (juste de l'affichage).</li>
+<li>Les interactions (confirmation, urgence) sont envoyées au hotspot.</li>
+</ul>
+<hr/>
+<h3 id="5-slaybot_table-table-esp32">5. <code>slaybot_table</code> (Table ESP32)<a class="headerlink" href="#5-slaybot_table-table-esp32" title="Permanent link">¶</a></h3>
 <p><strong>Responsabilité</strong> : Point de demande de service côté table.</p>
 <p><strong>Technologie</strong> : MicroPython + WebSocket client</p>
-<p><strong>Fonctionnalités</strong> :
-- Bouton de demande de service (nettoyage).
-- LEDs pour indiquer l'état (vert = disponible, jaune = en cours).
-- Connexion automatique au hotspot.
-- Cooldown après chaque service.</p>
-<p><strong>Les points clés</strong> :
-- Très simple : une entrée (bouton), une sortie (LEDs).
-- Le cooldown empêche les appels répétés.
-- Redémarrage automatique en cas de perte réseau.</p>
-<h3 id="6-slaybot_utilitaire_dev-simulateur">6. <code>slaybot_utilitaire_dev</code> (Simulateur)<a class="headerlink" href="#6-slaybot_utilitaire_dev-simulateur" title="Permanent link">&para;</a></h3>
+<p><strong>Fonctionnalités</strong> :</p>
+<ul>
+<li>Bouton de demande de service (nettoyage).</li>
+<li>LEDs pour indiquer l'état (vert = disponible, jaune = en cours).</li>
+<li>Connexion automatique au hotspot.</li>
+<li>Cooldown après chaque service.</li>
+</ul>
+<p><strong>Les points clés</strong> :</p>
+<ul>
+<li>Très simple : une entrée (bouton), une sortie (LEDs).</li>
+<li>Le cooldown empêche les appels répétés.</li>
+<li>Redémarrage automatique en cas de perte réseau.</li>
+</ul>
+<hr/>
+<h3 id="6-slaybot_utilitaire_dev-simulateur">6. <code>slaybot_utilitaire_dev</code> (Simulateur)<a class="headerlink" href="#6-slaybot_utilitaire_dev-simulateur" title="Permanent link">¶</a></h3>
 <p><strong>Responsabilité</strong> : Test et développement sans matériel réel.</p>
 <p><strong>Technologie</strong> : Qt + WebSocket server</p>
-<p><strong>Fonctionnalités</strong> :
-- Simulation visuelle du trajet du robot.
-- Serveur WebSocket local pour tester les flux.
-- Visualisation de la file d'attente.</p>
-<p><strong>Les points clés</strong> :
-- Utilise les mêmes protocoles WebSocket que le reste du système.
-- Permet de valider les flux sans Raspberry Pi ou hardware réel.</p>
-<h2 id="flux-de-communication-complet">Flux de communication complet<a class="headerlink" href="#flux-de-communication-complet" title="Permanent link">&para;</a></h2>
-<h3 id="scenario-une-commande-de-la-table-a-la-livraison">Scénario : Une commande de la table à la livraison<a class="headerlink" href="#scenario-une-commande-de-la-table-a-la-livraison" title="Permanent link">&para;</a></h3>
+<p><strong>Fonctionnalités</strong> :</p>
+<ul>
+<li>Simulation visuelle du trajet du robot.</li>
+<li>Serveur WebSocket local pour tester les flux.</li>
+<li>Visualisation de la file d'attente.</li>
+</ul>
+<p><strong>Les points clés</strong> :</p>
+<ul>
+<li>
+<p>Utilise les mêmes protocoles WebSocket que le reste du système</p>
+</li>
+<li>
+<p>Permet de valider les flux sans Raspberry Pi ou hardware réel.</p>
+</li>
+</ul>
+<hr/>
+<h2 id="flux-de-communication-complet">Flux de communication complet<a class="headerlink" href="#flux-de-communication-complet" title="Permanent link">¶</a></h2>
+<h3 id="scenario-une-commande-de-la-table-a-la-livraison">Scénario : Une commande de la table à la livraison<a class="headerlink" href="#scenario-une-commande-de-la-table-a-la-livraison" title="Permanent link">¶</a></h3>
 <ol>
 <li><strong>Client (web)</strong> : Sélectionne un menu et envoie la commande.</li>
 <li><strong>Dashboard</strong> : Le restaurateur valide la commande.</li>
@@ -1014,8 +806,9 @@
 <li><strong>hotspot</strong> → <strong>screen</strong> : Envoie <code>arrived/bar</code>.</li>
 <li><strong>screen</strong> : Affiche "PRÊT".</li>
 </ol>
-<h2 id="protocole-websocket">Protocole WebSocket<a class="headerlink" href="#protocole-websocket" title="Permanent link">&para;</a></h2>
-<h3 id="messages-standards">Messages standards<a class="headerlink" href="#messages-standards" title="Permanent link">&para;</a></h3>
+<hr/>
+<h2 id="protocole-websocket">Protocole WebSocket<a class="headerlink" href="#protocole-websocket" title="Permanent link">¶</a></h2>
+<h3 id="messages-standards">Messages standards<a class="headerlink" href="#messages-standards" title="Permanent link">¶</a></h3>
 <table>
 <thead>
 <tr>
@@ -1082,14 +875,17 @@
 </tr>
 </tbody>
 </table>
-<h2 id="objectifs-de-conception">Objectifs de conception<a class="headerlink" href="#objectifs-de-conception" title="Permanent link">&para;</a></h2>
-<p><strong>Une seule commande active par table</strong> : Pas de surcharge.</p>
-<p><strong>Tokens de session</strong> : Sécurité et suivi des sessions.</p>
-<p><strong>Paiement verrouillé côté restaurateur</strong> : Contrôle financier central.</p>
-<p><strong>Relais passif du hotspot</strong> : Découplage des modules.</p>
-<p><strong>Protocole WebSocket simple</strong> : Extensibilité et maintenance.</p>
-<p><strong>Documentation autonome</strong> : Compréhension sans lecture du code.</p>
-<h2 id="notes-de-securite">Notes de sécurité<a class="headerlink" href="#notes-de-securite" title="Permanent link">&para;</a></h2>
+<h2 id="objectifs-de-conception">Objectifs de conception<a class="headerlink" href="#objectifs-de-conception" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Une seule commande active par table</strong> : Pas de surcharge.</li>
+<li><strong>Tokens de session</strong> : Sécurité et suivi des sessions.</li>
+<li><strong>Paiement verrouillé côté restaurateur</strong> : Contrôle financier central.</li>
+<li><strong>Relais passif du hotspot</strong> : Découplage des modules.</li>
+<li><strong>Protocole WebSocket simple</strong> : Extensibilité et maintenance.</li>
+<li><strong>Documentation autonome</strong> : Compréhension sans lecture du code.</li>
+</ul>
+<hr/>
+<h2 id="notes-de-securite">Notes de sécurité<a class="headerlink" href="#notes-de-securite" title="Permanent link">¶</a></h2>
 <p>Le système SlayBot repose sur un hotspot Wi-Fi local (10.42.0.1) et un serveur WebSocket (0.0.0.0:8765). Pour éviter les accès non autorisés :</p>
 <ul>
 <li>Modifiez le mot de passe par défaut du hotspot.</li>
@@ -1099,61 +895,35 @@
 <li>Implémentez des mécanismes d'authentification pour les clients critiques.</li>
 </ul>
 <p>Consultez <a href="https://github.com/ismael-belghazi/Slaybot/blob/main/SECURITY.md">SECURITY.md</a> pour la politique de sécurité complète.</p>
-
-
-
-
-
-                
-              </article>
-            </div>
-          
-          
-        </div>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
       Material for MkDocs
     </a>
-  
 </div>
-      
-        <div class="md-social">
-  
-    
-    
-      
-      
-    
-    <a href="https://github.com/ismael-belghazi/Slaybot" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
-    </a>
-  
+<div class="md-social">
+<a class="md-social__link" href="https://github.com/ismael-belghazi/Slaybot" rel="noopener" target="_blank" title="github.com">
+<svg viewbox="0 0 496 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path></svg>
+</a>
 </div>
-      
-    </div>
-  </div>
+</div>
+</div>
 </footer>
-      
-    </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
-    </div>
-    
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tabs", "content.code.copy", "header.autohide"], "search": "../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}}</script>
-    
-    
-      <script src="../assets/javascripts/bundle.5cf534bf.min.js"></script>
-      
-    
-  </body>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tabs", "content.code.copy", "header.autohide"], "search": "../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}}</script>
+<script src="../assets/javascripts/bundle.5cf534bf.min.js"></script>
+<script type="module">import mermaid from "https://unpkg.com/mermaid@10.4.0/dist/mermaid.esm.min.mjs";
+mermaid.initialize({});</script></body>
 </html>
