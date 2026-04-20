@@ -1,0 +1,112 @@
+# =============================================================================
+#  CONFIG BUILDOZER - VERSION OPTIMISÉE POUR RSapp (NON-ROOT CLEAN)
+# =============================================================================
+
+FROM python:3.8
+
+# ------------------------------------------------------------------
+# Installer dépendances système
+# ------------------------------------------------------------------
+RUN apt-get update -y && apt-get install -y \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    libsqlite3-dev \
+    libjpeg62-turbo-dev \
+    liblcms2-dev \
+    libblas-dev \
+    liblapack-dev \
+    libatlas-base-dev \
+    zlib1g-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    git \
+    curl \
+    unzip \
+    zip \
+    openjdk-17-jdk \
+    libncurses5-dev \
+    libstdc++6 && apt-get clean
+
+# ------------------------------------------------------------------
+# Installer Python tools
+# ------------------------------------------------------------------
+RUN pip install --upgrade pip cython==0.29.36 python-for-android==2021.9.5 buildozer --no-cache-dir
+
+# ------------------------------------------------------------------
+# Créer utilisateur non-root
+# ------------------------------------------------------------------
+RUN useradd -m buildozer
+ENV HOME=/home/buildozer
+
+# ------------------------------------------------------------------
+# Créer le répertoire du projet avant de passer en buildozer
+# ------------------------------------------------------------------
+RUN mkdir -p /app
+RUN chown -R buildozer:buildozer /app
+
+# ------------------------------------------------------------------
+# Installer Android SDK (dans le home de buildozer)
+# ------------------------------------------------------------------
+RUN mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools && \
+    curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip && \
+    unzip sdk-tools.zip -d $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/ && \
+    rm sdk-tools.zip
+
+# Fix structure cmdline-tools (robuste)
+RUN cd $HOME/.buildozer/android/platform/android-sdk/cmdline-tools && \
+    mkdir -p latest && \
+    if [ -d "cmdline-tools" ]; then \
+        mv cmdline-tools/* latest/; \
+        rm -rf cmdline-tools; \
+    else \
+        mv * latest/ || true; \
+    fi
+
+# Variables Android et PATH
+ENV ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$HOME/.local/bin
+
+# Fix compatibilité ancienne version Buildozer
+RUN mkdir -p $ANDROID_HOME/tools/bin && \
+    ln -s $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager $ANDROID_HOME/tools/bin/sdkmanager
+
+# ------------------------------------------------------------------
+# Donner les droits au user pour le home SDK
+# ------------------------------------------------------------------
+RUN chown -R buildozer:buildozer $HOME
+
+# ------------------------------------------------------------------
+# Passer en utilisateur non-root
+# ------------------------------------------------------------------
+USER buildozer
+
+# ------------------------------------------------------------------
+# Installer SDK + licences
+# ------------------------------------------------------------------
+RUN sdkmanager --update && yes | sdkmanager --licenses
+
+# Installer composants Android nécessaires
+RUN sdkmanager \
+    "platforms;android-33" \
+    "build-tools;33.0.0" \
+    "platform-tools" \
+    "ndk;23.1.7779620"
+
+# ------------------------------------------------------------------
+# Créer répertoires de Buildozer pour le projet en tant que buildozer
+# ------------------------------------------------------------------
+RUN mkdir -p $HOME/.buildozer/android/platform/android-sdk && \
+    mkdir -p /app/.buildozer
+
+# ------------------------------------------------------------------
+# Copier projet dans le container
+# ------------------------------------------------------------------
+WORKDIR /app
+COPY --chown=buildozer:buildozer . /app/
+
+# ------------------------------------------------------------------
+# Lancer la compilation APK
+# ------------------------------------------------------------------
+CMD ["buildozer", "--no-interactive", "android", "debug"]

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Restaurateur</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+<header>
+    <h1>Dashboard des commandes</h1>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Déconnexion</a>
+</header>
+
+<main>
+    <h2>Commandes en cuisine</h2>
+    <table class="orders-table">
+        <thead>
+        <tr>
+            <th>Table</th>
+            <th>Plats</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="orders-body"></tbody>
+    </table>
+
+    <h2>Résumé par table</h2>
+    <table class="summary-table">
+        <thead>
+        <tr>
+            <th>Table</th>
+            <th>Commandes</th>
+            <th>Prix total (€)</th>
+        </tr>
+        </thead>
+        <tbody id="summary-body"></tbody>
+    </table>
+</main>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='dashboard.js') }}?v=1"></script>
+</body>
+</html>

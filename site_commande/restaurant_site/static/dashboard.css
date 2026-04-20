@@ -1,0 +1,90 @@
+/* -------------------- RESET -------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* -------------------- BODY -------------------- */
+body {
+    background: linear-gradient(135deg, #0f0f1a, #1c1c2b);
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 30px;
+}
+
+/* -------------------- CONTAINER -------------------- */
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* -------------------- TITRES -------------------- */
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* -------------------- TABLE -------------------- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+tr {
+    background: #1e1e2f;
+    border-bottom: 1px solid #333;
+}
+
+tr:hover {
+    background: #2a2a40;
+}
+
+/* -------------------- STATUS -------------------- */
+.status-EN_ATTENTE {
+    color: orange;
+    font-weight: bold;
+}
+
+.status-PRÊT {
+    color: #00e676;
+    font-weight: bold;
+}
+
+/* -------------------- BOUTONS -------------------- */
+button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 2px;
+}
+
+.confirm-btn {
+    background: #00c853;
+    color: white;
+}
+
+.cancel-btn {
+    background: #ff1744;
+    color: white;
+}
+
+.pay-btn {
+    background: #ffd600;
+    color: black;
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

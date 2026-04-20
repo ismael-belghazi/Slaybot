@@ -1,0 +1,25 @@
+[Unit]
+Description=Slaybot Robot + Hotspot
+After=network.target NetworkManager.service
+
+[Service]
+Type=simple
+User=hotspot
+WorkingDirectory=/home/hotspot/Documents/slaybot_hotspot
+
+Environment="PYTHONUNBUFFERED=1"
+
+# laisse le réseau se stabiliser
+ExecStartPre=/bin/sleep 5
+
+# lancement du cerveau avec le venv
+ExecStart=/home/hotspot/Documents/slaybot_hotspot/venv/bin/python3 -u /home/hotspot/Documents/slaybot_hotspot/serveur_cerveau.py
+
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

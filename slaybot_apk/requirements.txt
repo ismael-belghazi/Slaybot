@@ -1,0 +1,5 @@
+python3.11
+kivy
+kivymd
+pyserial
+websocket-client

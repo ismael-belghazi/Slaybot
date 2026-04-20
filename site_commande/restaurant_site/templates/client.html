@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Table d'Or</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='client.css') }}?v=1">
+    <script>
+        window.TABLE_NUMBER = "{{ table }}";
+        window.TABLE_TOKEN = "{{ token }}";
+    </script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='client.js') }}?v=1" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1 id="table-name">Table</h1>
+        <h2 id="table-story">Une expérience unique</h2>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="entrees">Entrées</button>
+            <button class="tab-btn" data-tab="plats">Plats</button>
+            <button class="tab-btn" data-tab="desserts">Desserts</button>
+            <button class="tab-btn" data-tab="boissons">Boissons</button>
+        </div>
+
+        <div class="order-wrapper">
+            <form id="order-form" class="menu-wrapper">
+                <div id="menu"></div>
+                <button type="submit">Envoyer la commande</button>
+                <p id="status"></p>
+            </form>
+
+            <div class="order-summary">
+                <h3>Récapitulatif</h3>
+                <ul id="summary-list"></ul>
+                <span id="total">Total : 0€</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

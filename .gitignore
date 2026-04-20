@@ -1,7 +1,35 @@
 .idee.md
-buildozer.spec
-bin 
+bin
 .venv
 .buildozer
+.idea
+.env*
+config.json
 idee.md
-my-release-key.keystore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# MkDocs / documentation output
+site/
+docs/site/
+.tmp_pkg_download/
+qrcodes/*
+# Logs
+*.log
+
+# Editor temp files
+*.swp
+*.swo
+.DS_Store
+.vscode/
+
+# Package metadata
+*.egg-info/
+build/
+dist/
+
+# Pytest
+.pytest_cache/
