@@ -1,52 +1,11 @@
 # SlayBot
 
-SlayBot est un projet de service robotisé destiné aux restaurants. Il regroupe plusieurs modules interconnectés pour gérer la commande client, l'administration, la connexion hotspot, le pilotage du robot, le tableau tactile et la simulation.
+# sur pc pour avoir les requirements pour l application
+pip install -r requirements.txt
 
-## Structure du dépôt
-
-* `site_commande/` : application web Flask + SocketIO, dashboard restaurateur, gestion des commandes et passerelle vers le hotspot.
-* `slaybot_apk/` : application mobile Android Kivy pour contrôler le robot et suivre les missions.
-* `slaybot_hotspot/` : configuration Raspberry Pi pour hotspot Wi-Fi SlayBot et serveur WebSocket central.
-* `slaybot_screen/` : interface tactile du robot avec visage animé et gestion des confirmations.
-* `slaybot_table/` : client ESP32 pour les tables, demande le robot et affiche les états via LEDs.
-* `slaybot_utilitaire_dev/` : outils de simulation et de test pour développer sans matériel réel.
-
-
-## Installation et environnement Python
-
-### Version recommandée
-
-Python 3.11 est fortement recommandé pour éviter les problèmes de compilation avec certaines dépendances (notamment Pillow et PyQt5).
-
-
-### Installation de Python
-
-Installer Python 3.11 puis vérifier la version avec :
-```bash
-python --version
-```
-
-### Création d’un environnement virtuel (venv)
-
-Créer l’environnement :
-
-```bash
-py -3.11 -m venv .venv
-
-Activer le venv sous Windows PowerShell :
-
-.venv\Scripts\activate
-```
-
-### Mise à jour de pip
-```bash
-python -m pip install --upgrade pip
-```
-
-### Installation des dépendances
-
-Installer toutes les dépendances du projet avec :
-```bash
+# sur la raspberry 
+sudo apt update
+sudo apt install python3-pip
 pip install -r requirements.txt
 ```
 
@@ -100,3 +59,12 @@ gh-pages
 3. Installer les dépendances
 5. Lancer MkDocs si nécessaire
 
+# etape build le project vers apk (prévoir 20, 30 minutes pour le 1er build docker essentiel)
+# si c est pas deja fait 
+docker compose build 
+docker compose run kivy-apk buildozer init
+# modfier le buildoze.spec comme vous le souhaitez
+# run le build de l'application mobile
+docker compose run kivy-apk buildozer android clean
+# finaliser le build
+docker compose run kivy-apk buildozer android debug
