@@ -144,13 +144,20 @@ class MainScreen(Screen):
 
     def notify_payment(self, table_id):
         self.status = f"Paiement confirmé Table {table_id}"
-
+        
     def validate_order(self, task_name):
         if task_name in self.orders_to_prepare:
             self.orders_to_prepare.remove(task_name)
             self.update_orders_ui()
             table_id = task_name.split()[-1]
             self.add_to_queue(table_id, task_type="commande")
+
+            # Envoi immédiat au robot
+            if RobotAPI.online:
+                RobotAPI.send(f"go/table/{table_id}")
+            self.is_busy = True
+            self.status = f"En route (Commande) : Table {table_id}"
+
 
     def update_orders_ui(self):
         container = self.ids.orders_list
@@ -180,6 +187,12 @@ class MainScreen(Screen):
             table_id = task_name.split()[-1]
             self.add_to_queue(table_id, task_type="nettoyage")
 
+            # Envoi immédiat au robot
+            if RobotAPI.online:
+                RobotAPI.send(f"go/table/{table_id}")
+            self.is_busy = True
+            self.status = f"En route (Nettoyage) : Table {table_id}"
+        
     def update_clean_ui(self):
         container = self.ids.orders_list
         container.clear_widgets()
@@ -232,14 +245,18 @@ class MainScreen(Screen):
         if self.queue and not self.is_busy and RobotAPI.online:
             next_task = self.queue[0]
             table_id = next_task.split()[-1]
-            if next_task.startswith("ORD"):
-                RobotAPI.send(f"order/table/{table_id}")
-            elif next_task.startswith("CLEAN"):
-                RobotAPI.send(f"clean/table/{table_id}")
-            else:
-                RobotAPI.send(f"go/{table_id}")
+
+            # Toujours envoyer go/table/X
+            RobotAPI.send(f"go/table/{table_id}")
             self.is_busy = True
-            self.status = f"En route : Table {table_id}"
+
+            # Affichage visuel reste ORD ou CLEAN
+            if next_task.startswith("ORD"):
+                self.status = f"En route (Commande) : Table {table_id}"
+            elif next_task.startswith("CLEAN"):
+                self.status = f"En route (Nettoyage) : Table {table_id}"
+            else:
+                self.status = f"En route : Table {table_id}"
 
     # --- Sous-menus Commande/Nettoyage ---
     def toggle_submenu(self, task_type):
@@ -271,13 +288,26 @@ class MainScreen(Screen):
 
     # --- Arrêt d'urgence ---
     def emergency_stop(self):
+        # Stopper toutes les tâches
         self.queue.clear()
+        self.orders_to_prepare.clear()
+        self.clean_tasks.clear()
         self.is_busy = False
+        
+        # Mettre à jour l’UI
         self.update_queue_ui()
-        self.status = "ARRÊT D'URGENCE ! Retour à la base"
+        self.update_orders_ui()
+        
+        # Statut
+        self.status = "ARRÊT D'URGENCE ! Moteurs arrêtés"
+        
+        # Envoyer commande d'arrêt complet au robot si en ligne
+        if RobotAPI.online:
+            RobotAPI.send("emergency_stop") 
+    def go_to_bar(self):
         if RobotAPI.online:
             RobotAPI.send("go/bar")
-
+        self.status = "En route vers le bar..."
 # =============================================================================
 # ÉCRAN DE CONFIGURATION
 # =============================================================================
@@ -398,6 +428,10 @@ ScreenManager:
                     text: "ARRÊT"
                     background_color: 0.8, 0.1, 0.1, 1
                     on_press: root.emergency_stop()
+                StyledButton:
+                    text: "BAR  "
+                    background_color: 0.4, 0.4, 0.8, 1
+                    on_press: root.go_to_bar()
                 StyledButton:
                     text: "PARAMS"
                     background_color: 0.3, 0.3, 0.3, 1

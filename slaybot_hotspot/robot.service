@@ -1,23 +1,25 @@
 [Unit]
-Description=Cerveau du Robot et Hotspot
-# On attend que le réseau soit géré par le système
+Description=Slaybot Robot + Hotspot
 After=network.target NetworkManager.service
 
 [Service]
 Type=simple
-User=admin
-Group=admin
-WorkingDirectory=/home/admin/Documents/hotspot/
+User=hotspot
+WorkingDirectory=/home/hotspot/Documents/slaybot_hotspot
 
+Environment="PYTHONUNBUFFERED=1"
 
-ExecStartPre=/bin/bash -c 'until ip addr show wlan0 | grep -q "inet "; do sleep 2; done'
+# laisse le réseau se stabiliser
+ExecStartPre=/bin/sleep 5
 
-ExecStart=/home/admin/Documents/hotspot/venv/bin/python3 -u /home/admin/Documents/hotspot/serveur_cerveau.py
+# lancement du cerveau avec le venv
+ExecStart=/home/hotspot/Documents/slaybot_hotspot/venv/bin/python3 -u /home/hotspot/Documents/slaybot_hotspot/serveur_cerveau.py
 
-StandardOutput=inherit
-StandardError=inherit
 Restart=always
-RestartSec=10
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
