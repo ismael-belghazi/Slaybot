@@ -522,22 +522,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.broadcast" class="md-nav__link">
-    broadcast
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.handler" class="md-nav__link">
-    handler
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.piloter_deplacement" class="md-nav__link">
-    piloter_deplacement
+  <a href="#slaybot_hotspot.serveur_cerveau.move_robot" class="md-nav__link">
+    move_robot
   </a>
   
 </li>
@@ -806,22 +792,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.broadcast" class="md-nav__link">
-    broadcast
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.handler" class="md-nav__link">
-    handler
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.piloter_deplacement" class="md-nav__link">
-    piloter_deplacement
+  <a href="#slaybot_hotspot.serveur_cerveau.move_robot" class="md-nav__link">
+    move_robot
   </a>
   
 </li>
@@ -950,65 +922,19 @@
 
 
 
-<h4 id="slaybot_hotspot.serveur_cerveau.broadcast" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">broadcast</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+<h4 id="slaybot_hotspot.serveur_cerveau.move_robot" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">move_robot</span><span class="p">(</span><span class="n">target_type</span><span class="p">,</span> <span class="n">target_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-async"><code>async</code></small>
   </span>
 
-<a href="#slaybot_hotspot.serveur_cerveau.broadcast" class="headerlink" title="Permanent link">&para;</a></h4>
+<a href="#slaybot_hotspot.serveur_cerveau.move_robot" class="headerlink" title="Permanent link">&para;</a></h4>
 
 
   <div class="doc doc-contents ">
   
-      <p>Envoie le message à tous les clients connectés.</p>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h4 id="slaybot_hotspot.serveur_cerveau.handler" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">handler</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-async"><code>async</code></small>
-  </span>
-
-<a href="#slaybot_hotspot.serveur_cerveau.handler" class="headerlink" title="Permanent link">&para;</a></h4>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Gestion des messages reçus des clients.</p>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h4 id="slaybot_hotspot.serveur_cerveau.piloter_deplacement" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">piloter_deplacement</span><span class="p">(</span><span class="n">table_id</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-async"><code>async</code></small>
-  </span>
-
-<a href="#slaybot_hotspot.serveur_cerveau.piloter_deplacement" class="headerlink" title="Permanent link">&para;</a></h4>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Lance le script pilote pour la table et notifie l'APK à la fin.</p>
+      <p>Centralise les appels vers pilote.py et gère l'enchaînement</p>
 
   </div>
 
