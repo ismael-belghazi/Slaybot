@@ -1,146 +1,246 @@
+import tkinter as tk
 import asyncio
+import threading
 import websockets
-import socket
-import os
+import random
 
-# ---------------- CONFIG ----------------
-HOST = "0.0.0.0"
+ROBOT_IP = "10.42.0.1"
 PORT = 8765
+PASSWORD = "2403"   
 
-BASE_DIR = "/home/hotspot/Documents/slaybot_hotspot"
-PILOTE_PATH = os.path.join(BASE_DIR, "pilote.py")
 
-clients_actifs = set()
-process_en_cours = None 
-lock = asyncio.Lock()  # Sécurité anti-conflit moteurs
+class SlayBotUI:
+    def __init__(self, root):
+        self.root = root
 
-# ---------------- BROADCAST ----------------
-async def broadcast(message):
-    if clients_actifs:
-        print(f"[BROADCAST] {message}")
-        # On utilise asyncio.gather pour envoyer à tout le monde en parallèle
-        await asyncio.gather(*(c.send(message) for c in clients_actifs), return_exceptions=True)
+        self.root.attributes("-fullscreen", True)
+        self.root.attributes("-topmost", True)
+        self.root.config(bg="#000", cursor="none")
 
-# ---------------- GESTION PROCESS ----------------
-async def run_process(*args):
-    global process_en_cours
-    async with lock:
-        try:
-            process_en_cours = await asyncio.create_subprocess_exec(
-                *args,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            stdout, stderr = await process_en_cours.communicate()
-            code = process_en_cours.returncode
-            process_en_cours = None
-            return code, stdout.decode(), stderr.decode()
-        except Exception as e:
-            process_en_cours = None
-            print(f"[PROCESS ERROR] {e}")
-            return -1, "", str(e)
+        self.ws = None
+        self.loop = None
+        self.connected = False
 
-# ---------------- COMMANDES ROBOT ----------------
-async def move_robot(target_type, target_id=None):
-    """ Centralise les appels vers pilote.py et gère l'enchaînement """
-    if target_type == "table":
-        print(f"[ROBOT] En route vers Table {target_id}")
-        # CORRECTION : On envoie exactement ce que l'UI Tkinter attend
-        await broadcast(f"order/table/{target_id}") 
-        code, out, err = await run_process("python3", PILOTE_PATH, "table", str(target_id))
-        msg_suffix = f"table/{target_id}"
-    else:
-        print("[ROBOT] Retour au BAR")
-        await broadcast("go/bar")
-        code, out, err = await run_process("python3", PILOTE_PATH, "bar")
-        msg_suffix = "bar"
+        self.w = self.root.winfo_screenwidth()
+        self.h = self.root.winfo_screenheight()
 
-    if code == 0:
-        print(f"[OK] Arrivé : {msg_suffix}")
-        await broadcast(f"arrived/{msg_suffix}")
-    else:
-        print(f"[ERROR] {err}")
-        # En cas d'erreur physique, on avertit l'UI
-        await broadcast(f"status/emergency_stop")
+        self.tx = self.w / 2
+        self.ty = self.h / 2
+        self.sx = self.w / 2
+        self.sy = self.h / 2
 
-# ---------------- EMERGENCY STOP ----------------
-async def emergency_stop():
-    global process_en_cours
-    print("[EMERGENCY] STOP !")
-    if process_en_cours and process_en_cours.returncode is None:
-        try:
-            process_en_cours.terminate()
-        except:
-            pass
-        process_en_cours = None
-    
-    # On envoie le signal d'arrêt à toutes les interfaces
-    await broadcast("status/emergency_stop")
+        # états
+        self.state = "idle"  # idle = attend
+        self.eye_open = True
 
-# ---------------- HANDLER ----------------
-async def handler(websocket):
-    clients_actifs.add(websocket)
-    print(f"[CONNEXION] Nouveau client. Total : {len(clients_actifs)}")
-    try:
-        async for message in websocket:
-            msg = message.strip().lower()
-            print(f"[RX] {msg}")
+        self.canvas = tk.Canvas(root, bg="#000", highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
 
-            # 1. DÉPLACEMENTS (Ordres de l'APK ou Auto)
-            if msg.startswith("go/table/"):
-                table_id = msg.split("/")[-1]
-                asyncio.create_task(move_robot("table", table_id))
+        self.label = tk.Label(root, text="PRÊT", fg="white", bg="#000",
+                              font=("Arial", 34, "bold"))
+        self.label.place(relx=0.5, rely=0.08, anchor="center")
 
-            elif msg == "go/bar":
-                asyncio.create_task(move_robot("bar"))
+        # STOP
+        self.btn_stop = tk.Button(root, text="STOP",
+                                 bg="red", fg="white",
+                                 font=("Arial", 22, "bold"),
+                                 command=self.emergency)
+        self.btn_stop.place(relx=0.5, rely=0.9, anchor="center")
 
-            elif msg == "status/emergency_stop": # Match avec l'envoi de l'UI
-                await emergency_stop()
+        # CONFIRM
+        self.btn_confirm = tk.Button(root, text="CONFIRMER",
+                                    bg="green", fg="white",
+                                    font=("Arial", 20, "bold"),
+                                    command=self.confirm)
 
-            # 2. LOGIQUE DE CONFIRMATION (Bouton vert sur le Robot)
-            elif msg == "status/received":
-                print("[LOGIC] Client a cliqué sur confirmer, retour bar...")
-                # On informe tout le monde que c'est reçu
-                await broadcast("status/received")
-                await asyncio.sleep(2)
-                asyncio.create_task(move_robot("bar"))
+        # SETTINGS
+        self.btn_settings = tk.Button(root, text="⚙",
+                                     font=("Arial", 18),
+                                     command=self.open_settings)
+        self.btn_settings.place(x=20, y=20)
 
-            # 3. SYNCHRONISATION & RELAIS (Site Web / APK)
-            elif msg.startswith("order/table/") or msg.startswith("clean/table/"):
-                await broadcast(msg)
+        self.root.bind("<Motion>", self.on_touch)
 
-            elif any(x in msg for x in ["ready/", "paid/", "cancel/", "status/"]):
-                await broadcast(msg)
+        self.loop_render()
+        self.loop_blink()
 
-            elif msg == "arrived/table": # Si le pilote simule l'arrivée
-                 await broadcast("arrived/table")
+    # ---------------- TOUCH ----------------
+    def on_touch(self, e):
+        self.tx = e.x
+        self.ty = e.y
 
-    except websockets.exceptions.ConnectionClosed:
-        pass
-    finally:
-        clients_actifs.discard(websocket)
-        print(f"[DECONNEXION] Client parti. Reste : {len(clients_actifs)}")
+    # ---------------- BLINK ----------------
+    def loop_blink(self):
+        self.eye_open = False
+        self.root.after(120, self.open_eye)
 
-# ---------------- IP & MAIN ----------------
-def get_local_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
-    except: return "127.0.0.1"
-    finally: s.close()
+    def open_eye(self):
+        self.eye_open = True
+        self.root.after(random.randint(2000, 4000), self.loop_blink)
 
-async def main():
-    ip = get_local_ip()
-    print("========================================")
-    print(f"  SLAYBOT SERVER : ONLINE")
-    print(f"  ADRESSE : ws://{ip}:{PORT}")
-    print("========================================")
-    async with websockets.serve(handler, HOST, PORT):
-        await asyncio.Future() # Maintient le serveur ouvert
+    # ---------------- SMOOTH ----------------
+    def smooth(self):
+        self.sx += (self.tx - self.sx) * 0.08
+        self.sy += (self.ty - self.sy) * 0.08
 
+    # ---------------- RENDER ----------------
+    def loop_render(self):
+        self.canvas.delete("all")
+        self.smooth()
+
+        cx = self.w/2
+        cy = self.h/3
+
+
+        colors = {
+            "idle": "#00ffaa",        # attend
+            "moving": "#ffd400",
+            "happy": "#00ff66",
+            "impatient": "#ff8800",
+            "error": "#ff4444",
+            "emergency": "#ff0000",
+            "sad": "#3399ff",         # pas connecté
+            "dead": "#555555"         # STOP
+        }
+
+        # état automatique si pas connecté
+        if not self.connected:
+            self.state = "sad"
+
+        color = colors.get(self.state, "#ffffff")
+
+        # yeux
+        if self.state == "dead":
+            self.draw_x(cx-140, cy, color)
+            self.draw_x(cx+140, cy, color)
+
+        elif self.eye_open:
+            self.canvas.create_oval(cx-180, cy,
+                                    cx-90, cy+90,
+                                    fill=color)
+
+            self.canvas.create_oval(cx+90, cy,
+                                    cx+180, cy+90,
+                                    fill=color)
+
+        # bouche
+        self.draw_mouth(cx, cy, color)
+
+        self.root.after(16, self.loop_render)
+
+    # ---------------- MOUTH ----------------
+    def draw_mouth(self, cx, cy, color):
+        y = self.h/2
+
+        if self.state == "idle":
+            self.canvas.create_line(cx-100, y+70, cx+100, y+70,
+                                    fill=color, width=6)
+
+        elif self.state == "moving":
+            self.canvas.create_oval(cx-50, y, cx+50, y+80,
+                                    fill=color)
+
+        elif self.state == "happy":
+            self.canvas.create_arc(cx-160, y, cx+160, y+160,
+                                   start=0, extent=-180,
+                                   fill=color)
+
+        elif self.state == "sad":
+            self.canvas.create_arc(cx-120, y+80, cx+120, y,
+                                   start=0, extent=180,
+                                   outline=color, width=6)
+
+        elif self.state == "error":
+            self.canvas.create_rectangle(cx-100, y+70, cx+100, y+90,
+                                         fill=color)
+
+        elif self.state == "dead":
+            self.canvas.create_line(cx-120, y+80, cx+120, y+80,
+                                    fill=color, width=8)
+
+    # ---------------- X EYES ----------------
+    def draw_x(self, x, y, color):
+        self.canvas.create_line(x-40, y-40, x+40, y+40, fill=color, width=10)
+        self.canvas.create_line(x-40, y+40, x+40, y-40, fill=color, width=10)
+
+    # ---------------- ACTIONS ----------------
+    def confirm(self):
+        if self.ws:
+            asyncio.run_coroutine_threadsafe(
+                self.ws.send("status/received"), self.loop)
+
+        self.state = "idle"
+        self.btn_confirm.place_forget()
+
+    def emergency(self):
+        if self.ws:
+            asyncio.run_coroutine_threadsafe(
+                self.ws.send("emergency_stop"), self.loop)
+
+        self.state = "dead"  
+
+    # ---------------- SETTINGS ----------------
+    def open_settings(self):
+        win = tk.Toplevel(self.root)
+        win.geometry("300x250")
+        win.title("Settings")
+
+        tk.Label(win, text="Mot de passe").pack()
+
+        entry = tk.Entry(win, show="*")
+        entry.pack()
+
+        def validate():
+            if entry.get() == PASSWORD:
+                tk.Button(win, text="Reconnecter",
+                          command=lambda: threading.Thread(target=self.start_ws, daemon=True).start()
+                          ).pack(pady=10)
+
+        tk.Button(win, text="Valider", command=validate).pack(pady=5)
+
+        tk.Button(win, text="Fermer UI", command=self.root.destroy).pack()
+
+    # ---------------- WS ----------------
+    async def listen(self):
+        while True:
+            try:
+                async with websockets.connect(f"ws://{ROBOT_IP}:{PORT}") as ws:
+                    self.ws = ws
+                    self.connected = True
+
+                    async for msg in ws:
+                        msg = msg.lower()
+
+                        if "deplacement" in msg:
+                            self.state = "moving"
+
+                        elif "arrived/table" in msg:
+                            self.state = "happy"
+                            self.btn_confirm.place(relx=0.5, rely=0.75, anchor="center")
+
+                        elif "arrived/bar" in msg:
+                            self.state = "idle"
+                            self.btn_confirm.place_forget()
+
+                        elif "error" in msg:
+                            self.state = "error"
+
+            except:
+                self.connected = False
+                self.state = "sad"
+                await asyncio.sleep(3)
+
+    def start_ws(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_until_complete(self.listen())
+
+
+# ---------------- MAIN ----------------
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n[STOP] Serveur arrêté manuellement.")
+    root = tk.Tk()
+    app = SlayBotUI(root)
+
+    threading.Thread(target=app.start_ws, daemon=True).start()
+
+    root.mainloop()

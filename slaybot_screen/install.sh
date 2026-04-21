@@ -1,169 +1,270 @@
 #!/bin/bash
 set -e
 
-APP_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENV_DIR="$APP_DIR/venv"
-FACE_FILE="$APP_DIR/face.py"
+LOG_DIR="/home/hotspot/Documents/slaybot_hotspot"
+LOG_FILE="$LOG_DIR/hotspot.log"
 
-SERVICE_FACE="/etc/systemd/system/slaybot_face.service"
-SERVICE_WIFI="/etc/systemd/system/slaybot_wifi.service"
+mkdir -p "$LOG_DIR"
 
-WIFI_NAME="Slaybot"
-WIFI_PASS="MHI-Hotspot"
+echo "-------------------------------------------------------"
+echo "   SLAYBOT WIFI ROUTER PRO "
+echo "-------------------------------------------------------"
 
-echo "------------------------------------------------"
-echo " SLAYBOT SYSTEM MANAGER"
-echo "------------------------------------------------"
-echo "1: Installer"
-echo "2: Supprimer"
-echo "3: Redemarrer affichage"
-echo "------------------------------------------------"
-
+echo "0: Installer"
+echo "1: Supprimer"
+echo "2: Ajouter Wi-Fi manuel"
 read -p "Choix : " CHOICE
 
-# ---------------- DETECT WIFI ----------------
-WIFI_IFACE=$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1)
+# ---------------- WIFI DETECTION ----------------
+detect_wifi_interfaces() {
+    WIFI_INTERFACES=($(iw dev | awk '$1=="Interface"{print $2}'))
 
-if [ -z "$WIFI_IFACE" ]; then
-    WIFI_IFACE="wlan0"
-fi
+    WIFI_AP="wlan0"
+    WIFI_INET="wlan1"
 
-# ---------------- INSTALL ----------------
-install_all() {
-
-    echo "[INSTALL] system update"
-    sudo apt-get update -y
-    sudo apt-get install -y python3 python3-pip python3-tk python3-venv network-manager
-
-    echo "[INSTALL] wifi config"
-
-    sudo nmcli dev set "$WIFI_IFACE" managed yes
-
-    for i in {1..10}; do
-        nmcli dev wifi connect "$WIFI_NAME" password "$WIFI_PASS" ifname "$WIFI_IFACE" && break
-        sleep 2
-    done
-
-    echo "[INSTALL] IP FIXE"
-    sudo bash -c "cat > /etc/dhcpcd.conf <<EOF
-
-interface $WIFI_IFACE
-static ip_address=192.168.4.2/24
-static routers=192.168.4.1
-static domain_name_servers=8.8.8.8
-
-EOF"
-
-    echo "[INSTALL] python env"
-    mkdir -p "$APP_DIR"
-    python3 -m venv "$VENV_DIR"
-
-    source "$VENV_DIR/bin/activate"
-    pip install --upgrade pip setuptools wheel
-    pip install websockets pyserial
-    deactivate
-
-    # ---------------- FACE FILE ----------------
-    if [ ! -f "$FACE_FILE" ]; then
-        cat > "$FACE_FILE" <<EOF
-import tkinter as tk
-
-root = tk.Tk()
-root.title("SlayBot")
-root.geometry("400x300")
-
-label = tk.Label(root, text="SLAYBOT READY", font=("Arial", 18))
-label.pack(expand=True)
-
-root.mainloop()
-EOF
+    if ! iw dev wlan1 info >/dev/null 2>&1; then
+        WIFI_INET=""
+        WIFI_AP="wlan0"
+        echo "[WARN] Mode single Wi-Fi (hotspot only)"
     fi
 
-    # ---------------- WIFI SERVICE ----------------
-    sudo bash -c "cat > $SERVICE_WIFI <<EOF
+    echo "[INFO] AP=$WIFI_AP | INTERNET=${WIFI_INET:-NONE}"
+}
+
+# ---------------- AUTO BEST WIFI ----------------
+auto_best_wifi() {
+    [ -z "$WIFI_INET" ] && return
+
+    echo "[INFO] Scan Wi-Fi..."
+
+    sudo nmcli dev set "$WIFI_INET" managed yes
+
+    KNOWN_SSIDS=("raspberry")  # Liste des SSID connus
+    SSID_TO_CONNECT=""
+
+    for SSID in $(nmcli -t -f SSID dev wifi list ifname "$WIFI_INET" | grep -v "Slaybot"); do
+        if [[ " ${KNOWN_SSIDS[@]} " =~ " ${SSID} " ]]; then
+            SSID_TO_CONNECT="$SSID"
+            break
+        fi
+    done
+
+    if [ -z "$SSID_TO_CONNECT" ]; then
+        echo "[INFO] Aucun réseau connu trouvé, recherche du meilleur réseau alternatif..."
+        BEST_SSID=$(nmcli -t -f SSID,SIGNAL dev wifi list ifname "$WIFI_INET" | sort -t: -k2 -nr | head -n1 | cut -d: -f1)
+        SSID_TO_CONNECT="$BEST_SSID"
+    fi
+
+    if [ -z "$SSID_TO_CONNECT" ]; then
+        echo "[WARN] Aucun Wi-Fi détecté"
+        return
+    fi
+
+    echo "[INFO] Connexion au réseau : $SSID_TO_CONNECT"
+
+    if echo "$SSID_TO_CONNECT" | grep -q "raspberry"; then
+        echo "[INFO] Connexion à raspberry..."
+        nmcli dev wifi connect "raspberry" password "Awawawawa" ifname "$WIFI_INET" \
+            wifi-sec.key-mgmt wpa-psk \
+            wifi-sec.proto rsn \
+            wifi-sec.pairwise ccmp \
+            wifi-sec.group ccmp || {
+                echo "[ERROR] Échec de la connexion à raspberry, tentative de reconnexion."
+                sudo nmcli connection delete "raspberry" 2>/dev/null || true
+                sudo nmcli dev wifi connect "raspberry" password "Awawawawa" ifname "$WIFI_INET" \
+                    wifi-sec.key-mgmt wpa-psk \
+                    wifi-sec.proto rsn \
+                    wifi-sec.pairwise ccmp \
+                    wifi-sec.group ccmp || true
+            }
+    else
+        echo "[INFO] Connexion au meilleur réseau trouvé : $SSID_TO_CONNECT"
+        nmcli dev wifi connect "$SSID_TO_CONNECT" ifname "$WIFI_INET" || true
+    fi
+}
+
+# ---------------- AUTO RECONNECT ----------------
+auto_reconnect() {
+    (
+        while true; do
+            ping -c 1 8.8.8.8 >/dev/null 2>&1
+            if [ $? -ne 0 ]; then
+                echo "[WARN] Internet down → retry Wi-Fi"
+                auto_best_wifi
+            fi
+            sleep 30  # Augmenter le temps entre les tentatives de reconnexion
+        done
+    ) &
+}
+
+# ---------------- MANUAL WIFI ----------------
+add_wifi_manual() {
+    echo "-------------------------------------------------------"
+    echo "AJOUT WIFI MANUEL (SAFE)"
+    echo "-------------------------------------------------------"
+
+    read -p "SSID : " SSID
+    read -s -p "Mot de passe : " PASS
+    echo ""
+
+    sudo nmcli connection add type wifi ifname "$WIFI_INET" con-name "manual-$SSID" ssid "$SSID"
+    sudo nmcli connection modify "manual-$SSID" wifi-sec.key-mgmt wpa-psk
+    sudo nmcli connection modify "manual-$SSID" wifi-sec.psk "$PASS"
+    sudo nmcli connection modify "manual-$SSID" ipv4.method auto
+
+    sudo nmcli connection up "manual-$SSID"
+
+    echo "[OK] Wi-Fi ajouté"
+}
+
+# ---------------- HOTSPOT ----------------
+install_hotspot() {
+    iw list | grep -q "AP" || {
+        echo "[ERROR] AP non supporté"
+        exit 1
+    }
+
+    sudo nmcli connection delete Slaybot 2>/dev/null || true
+
+    echo "[INSTALL] Hotspot..."
+
+    # Forcer l'utilisation de la bande 2.4GHz (bande bg)
+    BAND="bg"
+
+    # Création du réseau hotspot
+    sudo nmcli con add type wifi ifname "$WIFI_AP" con-name Slaybot ssid Slaybot mode ap
+    sudo nmcli con modify Slaybot 802-11-wireless.band "$BAND"
+    sudo nmcli con modify Slaybot 802-11-wireless.channel 6
+
+    sudo nmcli con modify Slaybot 802-11-wireless-security.key-mgmt wpa-psk
+    sudo nmcli con modify Slaybot 802-11-wireless-security.psk "MHI-Hotspot"
+    sudo nmcli con modify Slaybot 802-11-wireless-security.proto rsn
+    sudo nmcli con modify Slaybot 802-11-wireless-security.pairwise ccmp
+    sudo nmcli con modify Slaybot 802-11-wireless-security.group ccmp
+
+    sudo nmcli con modify Slaybot ipv4.method shared
+    sudo nmcli con modify Slaybot ipv4.addresses 10.42.0.1/24
+
+    sudo nmcli con modify Slaybot connection.autoconnect yes
+    sudo nmcli con up Slaybot
+
+    create_robot_service
+
+    auto_best_wifi
+    auto_reconnect
+
+    echo "-------------------------------------------------------"
+    echo "HOTSPOT READY"
+    echo "SSID: Slaybot"
+    echo "PASSWORD: MHI-Hotspot"
+    echo "IP: 10.42.0.1"
+    echo "-------------------------------------------------------"
+
+    start_web_interface
+}
+
+# ---------------- ROBOT SERVICE ----------------
+create_robot_service() {
+    sudo bash -c 'cat > /etc/systemd/system/robot.service << EOF
 [Unit]
-Description=SlayBot WiFi Auto Connect
-After=network.target
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash -c \"nmcli dev wifi connect $WIFI_NAME password $WIFI_PASS || true\"
-
-[Install]
-WantedBy=multi-user.target
-EOF"
-
-    # ---------------- FACE SERVICE ----------------
-    sudo bash -c "cat > $SERVICE_FACE <<EOF
-[Unit]
-Description=SlayBot Face
-After=network.target slaybot_wifi.service
+Description=Slaybot Robot
+After=network.target NetworkManager.service
 
 [Service]
 Type=simple
-WorkingDirectory=$APP_DIR
-ExecStart=$VENV_DIR/bin/python $FACE_FILE
-Restart=always
-RestartSec=2
+User=hotspot
+WorkingDirectory=/home/hotspot/Documents/slaybot_hotspot
 
-User=$USER
-Environment=DISPLAY=:0
+Environment="PYTHONUNBUFFERED=1"
+
+ExecStartPre=/bin/sleep 5
+ExecStart=/home/hotspot/Documents/slaybot_hotspot/venv/bin/python3 -u /home/hotspot/Documents/slaybot_hotspot/serveur_cerveau.py
+
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
 
 [Install]
-WantedBy=graphical.target
-EOF"
+WantedBy=multi-user.target
+EOF'
 
     sudo systemctl daemon-reload
-    sudo systemctl enable slaybot_wifi.service
-    sudo systemctl enable slaybot_face.service
-    sudo systemctl restart slaybot_face.service
-
-    echo "INSTALL COMPLETE"
+    sudo systemctl enable robot.service
+    sudo systemctl restart robot.service
 }
 
-# ---------------- REMOVE ----------------
-remove_all() {
-
-    echo "[REMOVE] stop services"
-
-    sudo systemctl stop slaybot_face.service || true
-    sudo systemctl stop slaybot_wifi.service || true
-
-    sudo systemctl disable slaybot_face.service || true
-    sudo systemctl disable slaybot_wifi.service || true
-
-    sudo rm -f "$SERVICE_FACE"
-    sudo rm -f "$SERVICE_WIFI"
-
-    sudo nmcli connection delete Slaybot || true
-
+# ---------------- CLEAN ----------------
+clean_hotspot() {
+    sudo nmcli connection delete Slaybot 2>/dev/null || true
+    sudo nmcli device set "$WIFI_AP" managed yes || true
+    sudo systemctl stop robot.service 2>/dev/null || true
     sudo systemctl daemon-reload
-
-    echo "REMOVED"
+    sudo systemctl restart NetworkManager
 }
 
-# ---------------- RESTART DISPLAY ----------------
-restart_display() {
+# ---------------- WEB INTERFACE ----------------
+start_web_interface() {
+    echo "-------------------------------------------------------"
+    echo "Démarrage de l'interface Web..."
+    echo "Accédez à http://<votre_ip>:5000 pour configurer le hotspot."
+    echo "-------------------------------------------------------"
 
-    echo "[RESTART] face service restart"
+    # Démarrer un serveur Flask pour l'interface Web
+    python3 -m venv /home/hotspot/Documents/slaybot_hotspot/venv
+    source /home/hotspot/Documents/slaybot_hotspot/venv/bin/activate
+    pip install flask
 
-    sudo systemctl restart slaybot_face.service || true
+    echo "[INFO] Flask installé."
 
-    # fallback direct launch
-    if ! systemctl is-active --quiet slaybot_face.service; then
-        echo "[FALLBACK] manual start"
-        cd "$APP_DIR"
-        source "$VENV_DIR/bin/activate"
-        python3 "$FACE_FILE" &
-    fi
+    cat > /home/hotspot/Documents/slaybot_hotspot/app.py << EOF
+from flask import Flask, render_template
 
-    echo "RESTART DONE"
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
+EOF
+
+    cat > /home/hotspot/Documents/slaybot_hotspot/templates/index.html << EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slaybot WiFi Router</title>
+</head>
+<body>
+    <h1>Bienvenue sur l'interface Slaybot!</h1>
+    <p>Configurez votre hotspot WiFi ici.</p>
+</body>
+</html>
+EOF
+
+    # Démarrer le serveur Flask
+    cd /home/hotspot/Documents/slaybot_hotspot
+    flask run --host=0.0.0.0 --port=5000 --debug
 }
 
 # ---------------- MAIN ----------------
+detect_wifi_interfaces
+
 case "$CHOICE" in
-    1) install_all ;;
-    2) remove_all ;;
-    3) restart_display ;;
-    *) echo "Invalid choice" ;;
+    0)
+        install_hotspot
+        ;;
+    1)
+        clean_hotspot
+        ;;
+    2)
+        detect_wifi_interfaces
+        add_wifi_manual
+        ;;
+    *)
+        echo "[ERROR] Choix invalide"
+        exit 1
+        ;;
 esac

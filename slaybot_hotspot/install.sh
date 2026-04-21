@@ -25,7 +25,7 @@ detect_wifi_interfaces() {
     if ! iw dev wlan1 info >/dev/null 2>&1; then
         WIFI_INET=""
         WIFI_AP="wlan0"
-        echo "[WARN] Mode single Wi-Fi (hotspot only)"
+        echo "[WARN] Mode single Wi-Fi (hotspot uniquement)"
     fi
 
     echo "[INFO] AP=$WIFI_AP | INTERNET=${WIFI_INET:-NONE}"
@@ -39,23 +39,51 @@ auto_best_wifi() {
 
     sudo nmcli dev set "$WIFI_INET" managed yes
 
-    BEST_SSID=$(nmcli -t -f SSID,SIGNAL dev wifi list ifname "$WIFI_INET" | sort -t: -k2 -nr | head -n1 | cut -d: -f1)
+    KNOWN_SSIDS=("raspberry")  # Liste des SSID connus
+    SSID_TO_CONNECT=""
 
-    if [ -z "$BEST_SSID" ]; then
+    # Recherche des réseaux disponibles et sélection du réseau connu
+    for SSID in $(nmcli -t -f SSID dev wifi list ifname "$WIFI_INET" | grep -v "Slaybot"); do
+        if [[ " ${KNOWN_SSIDS[@]} " =~ " ${SSID} " ]]; then
+            SSID_TO_CONNECT="$SSID"
+            break
+        fi
+    done
+
+    # Si aucun réseau connu trouvé, on se connecte au meilleur réseau
+    if [ -z "$SSID_TO_CONNECT" ]; then
+        echo "[INFO] Aucun réseau connu trouvé, recherche du meilleur réseau alternatif..."
+        BEST_SSID=$(nmcli -t -f SSID,SIGNAL dev wifi list ifname "$WIFI_INET" | sort -t: -k2 -nr | head -n1 | cut -d: -f1)
+        SSID_TO_CONNECT="$BEST_SSID"
+    fi
+
+    # Si aucun réseau trouvé, on termine
+    if [ -z "$SSID_TO_CONNECT" ]; then
         echo "[WARN] Aucun Wi-Fi détecté"
         return
     fi
 
-    echo "[INFO] Meilleur Wi-Fi: $BEST_SSID"
+    echo "[INFO] Connexion au réseau : $SSID_TO_CONNECT"
 
-    if echo "$BEST_SSID" | grep -q "raspberry"; then
-        echo "[INFO] Connexion raspberry..."
-        nmcli dev wifi connect "raspberry" password "Awawawawa" ifname "$WIFI_INET" || true
-        return
+    if echo "$SSID_TO_CONNECT" | grep -q "raspberry"; then
+        echo "[INFO] Connexion à raspberry..."
+        nmcli dev wifi connect "raspberry" password "Awawawawa" ifname "$WIFI_INET" \
+            wifi-sec.key-mgmt wpa-psk \
+            wifi-sec.proto rsn \
+            wifi-sec.pairwise ccmp \
+            wifi-sec.group ccmp || {
+                echo "[ERROR] Échec de la connexion à raspberry, tentative de reconnexion."
+                sudo nmcli connection delete "raspberry" 2>/dev/null || true
+                sudo nmcli dev wifi connect "raspberry" password "Awawawawa" ifname "$WIFI_INET" \
+                    wifi-sec.key-mgmt wpa-psk \
+                    wifi-sec.proto rsn \
+                    wifi-sec.pairwise ccmp \
+                    wifi-sec.group ccmp || true
+            }
+    else
+        echo "[INFO] Connexion au meilleur réseau trouvé : $SSID_TO_CONNECT"
+        nmcli dev wifi connect "$SSID_TO_CONNECT" ifname "$WIFI_INET" || true
     fi
-
-    echo "[INFO] Connexion auto au meilleur réseau..."
-    nmcli dev wifi connect "$BEST_SSID" ifname "$WIFI_INET" || true
 }
 
 # ---------------- AUTO RECONNECT ----------------
@@ -67,7 +95,7 @@ auto_reconnect() {
                 echo "[WARN] Internet down → retry Wi-Fi"
                 auto_best_wifi
             fi
-            sleep 10
+            sleep 30  # Augmenter le temps entre les tentatives de reconnexion
         done
     ) &
 }
@@ -82,8 +110,8 @@ add_wifi_manual() {
     read -s -p "Mot de passe : " PASS
     echo ""
 
+    # Ajout de la connexion Wi-Fi manuelle
     sudo nmcli connection add type wifi ifname "$WIFI_INET" con-name "manual-$SSID" ssid "$SSID"
-
     sudo nmcli connection modify "manual-$SSID" wifi-sec.key-mgmt wpa-psk
     sudo nmcli connection modify "manual-$SSID" wifi-sec.psk "$PASS"
     sudo nmcli connection modify "manual-$SSID" ipv4.method auto
@@ -95,7 +123,7 @@ add_wifi_manual() {
 
 # ---------------- HOTSPOT ----------------
 install_hotspot() {
-
+    # Vérification de la compatibilité avec le mode AP
     iw list | grep -q "AP" || {
         echo "[ERROR] AP non supporté"
         exit 1
@@ -105,9 +133,12 @@ install_hotspot() {
 
     echo "[INSTALL] Hotspot..."
 
-    sudo nmcli con add type wifi ifname "$WIFI_AP" con-name Slaybot ssid Slaybot mode ap
+    # Forcer l'utilisation de la bande 2.4GHz (bande bg)
+    BAND="bg"
 
-    sudo nmcli con modify Slaybot 802-11-wireless.band bg
+    # Création du réseau hotspot
+    sudo nmcli con add type wifi ifname "$WIFI_AP" con-name Slaybot ssid Slaybot mode ap
+    sudo nmcli con modify Slaybot 802-11-wireless.band "$BAND"
     sudo nmcli con modify Slaybot 802-11-wireless.channel 6
 
     sudo nmcli con modify Slaybot 802-11-wireless-security.key-mgmt wpa-psk
@@ -120,7 +151,6 @@ install_hotspot() {
     sudo nmcli con modify Slaybot ipv4.addresses 10.42.0.1/24
 
     sudo nmcli con modify Slaybot connection.autoconnect yes
-
     sudo nmcli con up Slaybot
 
     create_robot_service
@@ -134,6 +164,8 @@ install_hotspot() {
     echo "PASSWORD: MHI-Hotspot"
     echo "IP: 10.42.0.1"
     echo "-------------------------------------------------------"
+
+    start_web_interface
 }
 
 # ---------------- ROBOT SERVICE ----------------
@@ -175,6 +207,28 @@ clean_hotspot() {
     sudo systemctl stop robot.service 2>/dev/null || true
     sudo systemctl daemon-reload
     sudo systemctl restart NetworkManager
+}
+
+# ---------------- WEB INTERFACE ----------------
+start_web_interface() {
+    echo "-------------------------------------------------------"
+    echo "Démarrage de l'interface Web..."
+    echo "Accédez à http://192.168.137.208:5000 pour configurer le hotspot."
+    echo "-------------------------------------------------------"
+
+    # Utilisation du Flask installé dans l'environnement virtuel
+    source /home/hotspot/Documents/slaybot_hotspot/venv/bin/activate
+
+    # Vérifier si les fichiers app.py et index.html existent
+    if [ ! -f "/home/hotspot/Documents/slaybot_hotspot/app.py" ] || [ ! -f "/home/hotspot/Documents/slaybot_hotspot/templates/index.html" ]; then
+        echo "[ERROR] Les fichiers app.py ou index.html manquent dans le répertoire templates."
+        exit 1
+    fi
+
+    # Démarrer Flask avec les fichiers existants
+    export FLASK_APP=/home/hotspot/Documents/slaybot_hotspot/app.py
+    export FLASK_ENV=development
+    nohup python3 /home/hotspot/Documents/slaybot_hotspot/app.py --host=10.42.0.1 --port=5000 &  # Exécution en arrière-plan
 }
 
 # ---------------- MAIN ----------------
