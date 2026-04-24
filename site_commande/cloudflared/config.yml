@@ -1,8 +1,6 @@
-tunnel: <UUID_DU_TUNNEL>
-credentials-file: /etc/cloudflared/<UUID_DU_TUNNEL>.json
-origincert: /etc/cloudflared/cert.pem
-
+tunnel: ff1ba387-1e9b-4e35-b585-03163849962a
 ingress:
-  - hostname: your.domain.example
+  - hostname: monsite.example.com
     service: http://web:5000
+
   - service: http_status:404

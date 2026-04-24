@@ -65,4 +65,5 @@ docker compose up -d --build
 
 - Vérifier que le hotspot SlayBot est accessible sur `HOTSPOT_WS_URL`.
 - Ne pas exposer le dashboard sans protection adéquate.
-- Utiliser les tokens de table pour éviter les accès non autorisés.
+- Utiliser les tokens de table pour éviter les accès non autorisés.
+

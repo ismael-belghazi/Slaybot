@@ -4,6 +4,7 @@
 pip install -r requirements.txt
 
 # sur la raspberry 
+``` bash
 sudo apt update
 sudo apt install python3-pip
 pip install -r requirements.txt
@@ -15,6 +16,7 @@ Se placer dans le dossier :
 ```bash
 cd slaybot_utilitaire_dev
 ```
+
 - Puis lancer :
 ```bash
 python simulation.py
