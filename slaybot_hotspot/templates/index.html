@@ -1,58 +1,245 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>Slaybot WiFi Router</title>
+    <title>SLAYBOT | TACTICAL HEALTH</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%2300ff41' stroke-width='8'><rect width='100' height='100' fill='black'/><path d='M10,50 L30,50 L40,20 L60,80 L70,50 L90,50' stroke-linecap='round' stroke-linejoin='round'/></svg>">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; padding: 20px; }
-        h1 { border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .card { background: #1e1e1e; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 6px solid #00ff00; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .stat-val { color: #00ff00; font-weight: bold; font-family: monospace; font-size: 1.1em; }
-        .label { color: #aaa; }
+        :root {
+            --neon-green: #00ff41;
+            --dark-green: #003b00;
+            --bg-black: #0a0a0a;
+            --panel-bg: rgba(0, 255, 65, 0.03);
+            --font-main: 'Segoe UI', 'Ubuntu Mono', monospace;
+        }
+
+        body { 
+            background-color: var(--bg-black);
+            color: var(--neon-green);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Scanlines & Grain (Identique Vision OS) */
+        body::before {
+            content: " ";
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 3px, 3px 100%;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .main-frame {
+            position: relative;
+            width: 90vw;
+            max-width: 1000px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            padding: 10px;
+        }
+
+        /* Coins Tactiques (Identique Vision OS) */
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--neon-green);
+        }
+        .top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            font-size: 0.9rem;
+        }
+
+        .system-display {
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .module-card {
+            background: var(--panel-bg);
+            border-left: 3px solid var(--neon-green);
+            padding: 20px;
+            position: relative;
+        }
+
+        .label {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .value {
+            font-size: 2rem;
+            font-weight: 200;
+            font-family: 'Ubuntu Mono', monospace;
+            display: block;
+        }
+
+        /* Barre de progression Tactical */
+        .bar-bg {
+            width: 100%;
+            height: 4px;
+            background: var(--dark-green);
+            margin-top: 15px;
+        }
+
+        .bar-inner {
+            height: 100%;
+            background: var(--neon-green);
+            width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            opacity: 0.8;
+        }
+
+        .blink { animation: blinker 1s infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        @media (max-width: 750px) {
+            .data-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <h1>Slaybot WiFi Router - Statistiques</h1>
 
-    <div class="card">
-        <h2>Hotspot (wlan0)</h2>
-        <p><span class="label">SSID :</span> <b>Slaybot</b></p>
-        <p><span class="label">IP :</span> <span class="stat-val">10.42.0.1</span></p>
-        <p><span class="label">État :</span> <span class="stat-val" id="ap_status">Chargement...</span></p>
+<div class="main-frame">
+    <div class="corner top-left"></div>
+    <div class="corner top-right"></div>
+    <div class="corner bottom-left"></div>
+    <div class="corner bottom-right"></div>
+
+    <header>
+        <div><span class="blink">●</span> SYSTEM_HEALTH</div>
+        <div style="font-weight: bold; opacity: 0.8;">SLAYBOT // CORE OS 2.1</div>
+        <div id="uptime">UPTIME: 00:00:00</div>
+    </header>
+
+    <div class="system-display">
+        <div class="data-grid">
+            <!-- CPU -->
+            <div class="module-card">
+                <span class="label">// CPU_LOAD</span>
+                <span id="cpu_usage_text" class="value">--%</span>
+                <div class="bar-bg"><div id="cpu_bar" class="bar-inner"></div></div>
+                <div class="status-badge">
+                    <span>TEMP:</span>
+                    <span id="cpu_temp">--°C</span>
+                </div>
+            </div>
+
+            <!-- RAM -->
+            <div class="module-card">
+                <span class="label">// MEM_BUFFER</span>
+                <span id="ram_usage_text" class="value">--%</span>
+                <div class="bar-bg"><div id="ram_bar" class="bar-inner"></div></div>
+                <div class="status-badge">
+                    <span>STATE:</span>
+                    <span id="ram_stat">CHECKING</span>
+                </div>
+            </div>
+
+            <!-- NET -->
+            <div class="module-card">
+                <span class="label">// SIGNAL_STRENGTH</span>
+                <span id="inet_signal" class="value">--%</span>
+                <div class="bar-bg"><div id="net_bar" class="bar-inner"></div></div>
+                <div class="status-badge">
+                    <span id="inet_ssid">RECHERCHE...</span>
+                    <span id="ap_status">--</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card" style="border-left-color: #007bff;">
-        <h2>Connexion Internet (wlan1)</h2>
-        <p><span class="label">SSID :</span> <span id="inet_ssid" class="stat-val">Recherche...</span></p>
-        <p><span class="label">Signal :</span> <span id="inet_signal" class="stat-val">--</span> %</p>
-    </div>
+    <footer style="padding: 15px 20px; font-size: 0.7rem; opacity: 0.5; border-top: 1px solid rgba(0, 255, 65, 0.1);">
+        > DIAGNOSTIC_MODE: ACTIVE // TELEMETRY_STREAM_CONNECTED
+    </footer>
+</div>
 
-    <div class="card" style="border-left-color: #ffaa00;">
-        <h2>Système</h2>
-        <p><span class="label">Température CPU :</span> <span id="cpu_temp" class="stat-val">--</span> °C</p>
-        <p><span class="label">Usage CPU :</span> <span id="cpu_usage" class="stat-val">--</span> %</p>
-        <p><span class="label">RAM utilisée :</span> <span id="ram_usage" class="stat-val">--</span> Mo</p>
-    </div>
+<script>
+    function updateStats() {
+        fetch('/stats')
+            .then(res => res.json())
+            .then(data => {
+                // Textes
+                document.getElementById('cpu_usage_text').innerText = data.cpu_usage + "%";
+                document.getElementById('ram_usage_text').innerText = data.ram_usage + "%";
+                document.getElementById('inet_signal').innerText = data.inet_signal + "%";
+                document.getElementById('cpu_temp').innerText = data.cpu_temp + "°C";
+                document.getElementById('inet_ssid').innerText = data.inet_ssid.slice(0, 12);
+                document.getElementById('ap_status').innerText = data.ap_status;
 
-    <script>
-        function updateStats() {
-            fetch('/stats')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('cpu_temp').innerText = data.cpu_temp;
-                    document.getElementById('cpu_usage').innerText = data.cpu_usage;
-                    document.getElementById('ram_usage').innerText = data.ram_usage;
-                    document.getElementById('inet_ssid').innerText = data.inet_ssid;
-                    document.getElementById('inet_signal').innerText = data.inet_signal;
-                    document.getElementById('ap_status').innerText = data.ap_status;
-                })
-                .catch(err => console.error("Erreur de mise à jour:", err));
-        }
+                // Barres
+                document.getElementById('cpu_bar').style.width = data.cpu_usage + "%";
+                document.getElementById('ram_bar').style.width = data.ram_usage + "%";
+                document.getElementById('net_bar').style.width = data.inet_signal + "%";
 
-        // Met à jour toutes les 3 secondes pour ne pas surcharger le CPU
-        setInterval(updateStats, 3000);
-        updateStats(); // Premier appel immédiat
-    </script>
+                // Alertes
+                if(data.cpu_temp > 65) {
+                    document.getElementById('cpu_temp').style.color = "#ff3e3e";
+                    document.getElementById('cpu_temp').classList.add('blink');
+                } else {
+                    document.getElementById('cpu_temp').style.color = "var(--neon-green)";
+                    document.getElementById('cpu_temp').classList.remove('blink');
+                }
+                document.getElementById('ram_stat').innerText = data.ram_usage > 85 ? "WARNING" : "OPTIMAL";
+            })
+            .catch(e => {
+                document.getElementById('ap_status').innerText = "DISCONNECTED";
+            });
+    }
+
+    // Horloge Uptime simple
+    let seconds = 0;
+    setInterval(() => {
+        seconds++;
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('uptime').innerText = `UPTIME: ${h}:${m}:${s}`;
+    }, 1000);
+
+    setInterval(updateStats, 3000);
+    updateStats();
+</script>
+
 </body>
 </html>

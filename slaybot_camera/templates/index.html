@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>SLAYBOT | TACTICAL VISION</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%2300ff41' stroke-width='6'><rect width='100' height='100' fill='black'/><circle cx='50' cy='50' r='20' stroke-width='8'/><path d='M20,10 L10,10 L10,20 M80,10 L90,10 L90,20 M20,90 L10,90 L10,80 M80,90 L90,90 L90,80' stroke-width='10'/></svg>">
+    <style>
+        :root {
+            --neon-green: #00ff41;
+            --dark-green: #003b00;
+            --bg-black: #0a0a0a;
+            --panel-bg: rgba(0, 255, 65, 0.03);
+            --font-main: 'Segoe UI', 'Ubuntu Mono', monospace;
+        }
+
+        body { 
+            background-color: var(--bg-black);
+            color: var(--neon-green);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Scanlines & Grain */
+        body::before {
+            content: " ";
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 3px, 3px 100%;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .main-frame {
+            position: relative;
+            width: 90vw;
+            max-width: 1000px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            padding: 10px;
+        }
+
+        /* Coins Tactiques */
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--neon-green);
+        }
+        .top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            font-size: 0.9rem;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            line-height: 0;
+            border: 1px solid rgba(0, 255, 65, 0.1);
+        }
+
+        /* Viseur (Crosshair) */
+        .crosshair {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px; height: 150px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .crosshair::after, .crosshair::before {
+            content: '';
+            position: absolute;
+            background: var(--neon-green);
+            opacity: 0.5;
+        }
+        .crosshair::before { top: 50%; left: -10%; width: 120%; height: 1px; }
+        .crosshair::after { left: 50%; top: -10%; height: 120%; width: 1px; }
+
+        img {
+            width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+        }
+
+        .data-overlay {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .data-card {
+            background: var(--panel-bg);
+            border-left: 3px solid var(--neon-green);
+            padding: 12px;
+            position: relative;
+        }
+
+        .label {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .value {
+            font-size: 1.5rem;
+            font-weight: 200;
+            font-family: 'Ubuntu Mono', monospace;
+        }
+
+        .rec-dot {
+            width: 10px;
+            height: 10px;
+            background: #ff0000;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<div class="main-frame">
+    <div class="corner top-left"></div>
+    <div class="corner top-right"></div>
+    <div class="corner bottom-left"></div>
+    <div class="corner bottom-right"></div>
+
+    <header>
+        <div><span class="rec-dot"></span>LIVE_FEED_01</div>
+        <div style="font-weight: bold; opacity: 0.8;">SLAYBOT // VISION OS 2.1</div>
+        <div id="clock">00:00:00</div>
+    </header>
+
+    <div class="video-container">
+        <div class="crosshair"></div>
+        <img src="/video_feed" onerror="this.src='https://via.placeholder.com/640x480/050505/00FF41?text=SIGNAL_LOST_RECONNECTING...'">
+    </div>
+
+    <div class="data-overlay">
+        <div class="data-card">
+            <span class="label">// COORD_X_AXIS</span>
+            <span id="pos_x" class="value">000.0</span>
+        </div>
+        <div class="data-card">
+            <span class="label">// NAVIGATION_HINT</span>
+            <span id="turn" class="value">STEADY</span>
+        </div>
+        <div class="data-card">
+            <span class="label">// TARGET_CHROMA</span>
+            <span id="color" class="value">NULL</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mise à jour de l'horloge
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString();
+    }, 1000);
+
+    // Mise à jour des données
+    setInterval(() => {
+        fetch('/status')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('pos_x').innerText = data.x;
+                document.getElementById('turn').innerText = data.turn;
+                document.getElementById('color').innerText = data.color;
+                
+                // Alert visuel si cible détectée
+                const card = document.getElementById('color').parentElement;
+                if(data.color !== "None" && data.color !== "---") {
+                    card.style.background = "rgba(0, 255, 65, 0.15)";
+                } else {
+                    card.style.background = "var(--panel-bg)";
+                }
+            })
+            .catch(() => {});
+    }, 100);
+</script>
+
+</body>
+</html>

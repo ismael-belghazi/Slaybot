@@ -1,6 +1,0 @@
-tunnel: ff1ba387-1e9b-4e35-b585-03163849962a
-ingress:
-  - hostname: monsite.example.com
-    service: http://web:5000
-
-  - service: http_status:404

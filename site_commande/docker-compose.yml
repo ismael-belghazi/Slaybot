@@ -33,17 +33,5 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared_tunnel
-    restart: unless-stopped
-    depends_on:
-      - web
-    volumes:
-      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
-    environment:
-      TUNNEL_ORIGIN_CERT: /etc/cloudflared/cert.pem
-    command: tunnel --config /etc/cloudflared/config.yml run restaurant_app
-
 volumes:
   postgres_data:
