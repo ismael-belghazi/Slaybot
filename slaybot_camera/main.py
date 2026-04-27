@@ -61,95 +61,99 @@ class CameraManager:
     def _update_loop(self):
             self.cap = self._init_camera()
             
-            # --- CONFIGURATION DES COULEURS (A ajuster selon tes tests) ---
             color_ranges = {
-                "JAUNE": (np.array([20, 100, 100]), np.array([35, 255, 255])),
-                "BLEU":  (np.array([100, 150, 50]), np.array([130, 255, 255])),
-                "ROUGE": (np.array([0, 150, 50]),   np.array([10, 255, 255])),
-                "VERT":  (np.array([40, 100, 50]),  np.array([80, 255, 255]))
+                "JAUNE": (np.array([15, 80, 80]), np.array([40, 255, 255])),
+                "BLEU":  (np.array([90, 60, 40]), np.array([140, 255, 255])), # Plus large pour le bleu
+                "ROUGE": (np.array([0, 100, 40]),  np.array([10, 255, 255])),
+                "VERT":  (np.array([40, 50, 40]),   np.array([90, 255, 255]))
             }
+
+            self.last_valid_color = "NONE"
 
             while self.running:
                 if self.cap is None:
-                    time.sleep(3); self.cap = self._init_camera(); continue
+                    time.sleep(1); self.cap = self._init_camera(); continue
 
                 success, frame = self.cap.read()
-                if not success or frame is None:
-                    self.cap.release(); self.cap = None; continue
+                if not success: continue
 
                 try:
                     h, w = frame.shape[:2]
-                    center_screen = w // 2
-                    
-                    blurred = cv2.GaussianBlur(frame, (5, 5), 0)
-                    hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+                    overlay = frame.copy()
 
+                    # 1. PERSPECTIVE
+                    src_pts = np.float32([[20, h], [w-20, h], [int(w*0.65), int(h*0.4)], [int(w*0.35), int(h*0.4)]])
+                    dst_pts = np.float32([[w//4, h], [3*w//4, h], [3*w//4, 0], [w//4, 0]])
+                    M_persp = cv2.getPerspectiveTransform(src_pts, dst_pts)
+                    M_inv = cv2.getPerspectiveTransform(dst_pts, src_pts)
+                    
+                    bird_view = cv2.warpPerspective(frame, M_persp, (w, h))
+                    hsv = cv2.cvtColor(cv2.GaussianBlur(bird_view, (7, 7), 0), cv2.COLOR_BGR2HSV)
+
+                    # 2. DÉTECTION DE COULEUR AVEC PRIORITÉ
                     active_mask = None
-                    line_color = "NONE"
+                    current_color = "NONE"
                     max_area = 0
-                    
-                    for name, (low, high) in color_ranges.items():
-                        m = cv2.inRange(hsv, low, high)
-                        area = cv2.countNonZero(m[int(h*0.5):h, :]) 
-                        if area > max_area and area > 800:
-                            max_area = area
-                            active_mask = m
-                            line_color = name
 
-                    turn_msg = "LOST"
-                    prediction_x = center_screen
+                    for name, (low, high) in color_ranges.items():
+                        mask = cv2.inRange(hsv, low, high)
+                        # On check la zone basse pour confirmer la couleur
+                        area = cv2.countNonZero(mask[int(h*0.5):, :])
+                        if area > max_area and area > 400: # Seuil légèrement baissé
+                            max_area = area
+                            active_mask = mask
+                            current_color = name
+                    
+                    # --- SYSTÈME DE MÉMOIRE ---
+                    if current_color != "NONE":
+                        self.last_valid_color = current_color
+                    
+                    target_x = w // 2
+                    turn_hint = "LOST"
 
                     if active_mask is not None:
-                        # Bas (0.85h), Milieu (0.65h), Haut (0.45h)
-                        points = []
-                        for v_ratio in [0.85, 0.65, 0.45]:
-                            v_pos = int(h * v_ratio)
-                            roi_strip = active_mask[v_pos-10:v_pos+10, :]
-                            M = cv2.moments(roi_strip)
-                            if M["m00"] > 100:
-                                cx_strip = int(M["m10"] / M["m00"])
-                                points.append((cx_strip, v_pos))
-                                # Dessiner les points de détection
-                                cv2.circle(frame, (cx_strip, v_pos), 5, (0, 255, 255), -1)
+                        curve_points_bird = []
+                        num_steps = 10
+                        for i in range(num_steps):
+                            curr_y = int(h - (i * (h / num_steps)) - 10)
+                            row_pixels = np.where(active_mask[curr_y, :] > 0)[0]
+                            if len(row_pixels) > 0:
+                                center = (row_pixels[0] + row_pixels[-1]) // 2
+                                curve_points_bird.append([center, curr_y])
 
-                        if len(points) >= 1:
-                            # La cible est la moyenne pondérée (on donne plus de poids au lointain pour anticiper)
-                            # Si on a plusieurs points, on peut calculer la dérive
-                            if len(points) == 3:
-                                # Poids : 20% bas, 30% milieu, 50% haut (nticipation forte)
-                                prediction_x = int(points[0][0]*0.2 + points[1][0]*0.3 + points[2][0]*0.5)
-                                cv2.line(frame, points[0], points[2], (255, 0, 255), 3)
-                            else:
-                                prediction_x = points[0][0]
+                        if len(curve_points_bird) > 1:
+                            pts = np.array([curve_points_bird], dtype='float32')
+                            projected_pts = cv2.perspectiveTransform(pts, M_inv)[0]
 
-                            error = prediction_x - center_screen
+                            # Dessin de la trajectoire
+                            for j in range(len(projected_pts) - 1):
+                                cv2.line(overlay, tuple(projected_pts[j].astype(int)), 
+                                        tuple(projected_pts[j+1].astype(int)), (0, 255, 0), 3)
+
+                            target_x = curve_points_bird[-1][0]
+                            error = target_x - (w // 2)
                             
-                            contours, _ = cv2.findContours(active_mask[int(h*0.7):int(h*0.9), :], 
-                                                        cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                            if contours:
-                                largest = max(contours, key=cv2.contourArea)
-                                lx, ly, lw, lh = cv2.boundingRect(largest)
-                                cv2.rectangle(frame, (lx, int(h*0.7)), (lx+lw, int(h*0.9)), (0, 0, 255), 2)
+                            if abs(error) < 20: turn_hint = "FORWARD"
+                            elif error > 0: turn_hint = "RIGHT"
+                            else: turn_hint = "LEFT"
 
-                            # Logique de virage prédictive
-                            if error < -60: turn_msg = "SHARP_LEFT"
-                            elif error < -20: turn_msg = "LEFT"
-                            elif error > 60: turn_msg = "SHARP_RIGHT"
-                            elif error > 20: turn_msg = "RIGHT"
-                            else: turn_msg = "FORWARD"
-
-                    # 4. MISE À JOUR DES DONNÉES
+                    # 3. MISE À JOUR ET ENVOI
                     with self.lock:
-                        self.frame = frame
-                        self.line_x = prediction_x
-                        self.turn_hint = f"{line_color}_{turn_msg}"
-                        self.detected_color = line_color
+                        self.frame = overlay 
+                        self.line_x = target_x
+                        # On utilise self.last_valid_color pour que l'UI ne clignote pas
+                        self.turn_hint = f"{self.last_valid_color}_{turn_hint}"
+                        self.detected_color = self.last_valid_color
+
+                    # Debug dans la console pour vérifier
+                    if current_color != "NONE":
+                        logger.debug(f"Détection active: {current_color}")
 
                 except Exception as e:
                     logger.error(f"Vision Error: {e}")
 
-                time.sleep(0.01) 
-
+                time.sleep(0.01)
+                
     def get_frames(self):
         while self.running:
             with self.lock:
