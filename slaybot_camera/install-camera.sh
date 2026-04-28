@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==============================================================================
-# SlayBot Camera - Script d'installation automatisé
+# SlayBot Camera - Script d'installation automatisé (Version Pilotage Angle)
 # ==============================================================================
 
 set -euo pipefail
@@ -21,7 +21,6 @@ error() { echo -e "\033[1;31m[ERREUR]\033[0m $1"; exit 1; }
 USER_NAME=${SUDO_USER:-$USER}
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 INPUT_ARG=${1:-0} 
-PORT=5001
 
 if [[ "$INPUT_ARG" == "1" ]]; then
     info "Désinstallation complète de SlayBot Camera (Mode 1)..."
@@ -44,7 +43,8 @@ info "Configuration de l'environnement Python..."
 cd "${SCRIPT_DIR}"
 sudo -u "$USER_NAME" python3 -m venv "$VENV_DIR"
 sudo -u "$USER_NAME" "$VENV_DIR/bin/pip" install --upgrade pip -q
-sudo -u "$USER_NAME" "$VENV_DIR/bin/pip" install flask opencv-python-headless numpy > /dev/null
+info "Installation des modules Python (Flask, OpenCV, Websockets)..."
+sudo -u "$USER_NAME" "$VENV_DIR/bin/pip" install flask opencv-python-headless numpy websockets > /dev/null
 
 info "Configuration du service Systemd..."
 cat <<EOF > "/etc/systemd/system/${APP_NAME}.service"
@@ -69,9 +69,9 @@ systemctl daemon-reload
 systemctl enable "${APP_NAME}.service"
 systemctl start "${APP_NAME}.service"
 
-success "SlayBot Camera est installé et démarré !"
+success "SlayBot Camera est installé avec support WebSocket !"
 info "-------------------------------------------------------"
 info "  - Interface Live  : http://$(hostname -I | cut -d' ' -f1):$PORT"
-info "  - API Status      : http://$(hostname -I | cut -d' ' -f1):$PORT/status"
+info "  - WebSocket Sortie: ws://10.42.0.1:8765/pilote"
 info "  - Désinstaller    : sudo ./install-camera.sh 1"
 info "-------------------------------------------------------"
