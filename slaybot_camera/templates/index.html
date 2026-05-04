@@ -4,6 +4,7 @@
     <title>SLAYBOT | TACTICAL VISION</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="favicon" rel="icon" type="image/x-icon" href="">
     <style>
         :root {
             --neon-green: #00ff41;
@@ -22,7 +23,7 @@
             text-transform: uppercase; letter-spacing: 1px;
         }
 
-        /* Scanlines Effect */
+        /* Effet scanlines global */
         body::before {
             content: " ";
             position: fixed; top: 0; left: 0; bottom: 0; right: 0;
@@ -31,11 +32,32 @@
             z-index: 100; pointer-events: none;
         }
 
+        /* Écran d'initialisation */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-black);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .boot-text {
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        /* Main Frame */
         .main-frame {
             position: relative;
             width: 90vw; max-width: 1000px;
             border: 1px solid rgba(0, 255, 65, 0.2);
             padding: 10px;
+            z-index: 10;
         }
 
         header {
@@ -46,15 +68,59 @@
             font-size: 0.9rem;
         }
 
+        /* CONTENEUR VIDÉO AVEC HUD TACTIQUE */
         .video-container {
             position: relative;
             background: #000;
             line-height: 0;
             border: 1px solid rgba(0, 255, 65, 0.1);
+            overflow: hidden;
+        }
+
+        /* Coins du viseur */
+        .video-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(to right, var(--neon-green) 2px, transparent 2px) 0 0,
+                linear-gradient(to bottom, var(--neon-green) 2px, transparent 2px) 0 0,
+                linear-gradient(to left, var(--neon-green) 2px, transparent 2px) 100% 0,
+                linear-gradient(to bottom, var(--neon-green) 2px, transparent 2px) 100% 0,
+                linear-gradient(to right, var(--neon-green) 2px, transparent 2px) 0 100%,
+                linear-gradient(to top, var(--neon-green) 2px, transparent 2px) 0 100%,
+                linear-gradient(to left, var(--neon-green) 2px, transparent 2px) 100% 100%,
+                linear-gradient(to top, var(--neon-green) 2px, transparent 2px) 100% 100%;
+            background-repeat: no-repeat;
+            background-size: 30px 30px;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Ligne d'horizon tactique */
+        .horizon-line {
+            position: absolute;
+            top: 50%; left: 5%; width: 90%; height: 1px;
+            background: rgba(0, 255, 65, 0.15);
+            z-index: 4;
+            pointer-events: none;
         }
 
         img { width: 100%; max-height: 60vh; object-fit: contain; }
 
+        /* Animation d'allumage caméra */
+        .camera-boot {
+            animation: camera-flicker 0.4s ease-out forwards;
+        }
+
+        @keyframes camera-flicker {
+            0% { opacity: 0; filter: brightness(5) blur(10px); transform: scaleY(0.005); }
+            50% { opacity: 0.5; transform: scaleY(1); }
+            100% { opacity: 1; filter: brightness(1) blur(0); transform: scale(1); }
+        }
+
+        /* Data Display */
         .data-overlay {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -71,7 +137,6 @@
         .label { font-size: 0.65rem; opacity: 0.6; display: block; }
         .value { font-size: 1.5rem; font-family: 'Ubuntu Mono', monospace; }
 
-        /* JAUGE D'ANGLE */
         .angle-gauge {
             width: 100%; height: 4px;
             background: rgba(0, 255, 65, 0.1);
@@ -96,14 +161,22 @@
 </head>
 <body>
 
+<div id="boot-screen">
+    <div class="boot-text" id="boot-log">INITIALIZING SYSTEM...</div>
+    <div style="width: 200px; height: 2px; background: rgba(0,255,65,0.2); margin-top:10px;">
+        <div id="boot-progress" style="width: 0%; height: 100%; background: var(--neon-green); transition: width 0.2s;"></div>
+    </div>
+</div>
+
 <div class="main-frame">
     <header>
         <div><span class="rec-dot"></span>LIVE_FEED_01</div>
-        <div style="font-weight: bold;">SLAYBOT // ANGLE_CONTROL_OS</div>
+        <div style="font-weight: bold;">SLAYBOT // TACTICAL_OS</div>
         <div id="clock">00:00:00</div>
     </header>
 
     <div class="video-container">
+        <div class="horizon-line"></div>
         <img src="/video_feed" onerror="this.src='https://via.placeholder.com/640x480/050505/00FF41?text=SIGNAL_LOST...'">
     </div>
 
@@ -127,42 +200,112 @@
         </div>
     </div>
 </div>
-
 <script>
-    // Horloge
+    // FAVICON ANIMÉ (Caméra qui clignote)
+    const favicon = document.getElementById('favicon');
+    const canvas = document.createElement('canvas');
+    canvas.width = 32; canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+
+    function updateFavicon(color) {
+        ctx.clearRect(0, 0, 32, 32);
+        ctx.fillStyle = color;
+        ctx.fillRect(4, 8, 18, 14); 
+        ctx.beginPath();
+        ctx.moveTo(22, 12); ctx.lineTo(28, 8); ctx.lineTo(28, 22); ctx.lineTo(22, 18);
+        ctx.fill();
+        favicon.href = canvas.toDataURL('image/png');
+    }
+
+    let toggle = false;
+    setInterval(() => {
+        updateFavicon(toggle ? "#00ff41" : "#000000");
+        toggle = !toggle;
+    }, 1000);
+
+    // SÉQUENCE DE BOOT (Lancement du système)
+    window.onload = () => {
+        const logs = ["CONNECTING...", "SYNCING_CAMERA...", "CV_MODULE_LOADED", "TARGET_LOCKED", "SYSTEM_ONLINE"];
+        let step = 0;
+        const logEl = document.getElementById('boot-log');
+        const progressEl = document.getElementById('boot-progress');
+        const bootScreen = document.getElementById('boot-screen');
+        const cameraImg = document.querySelector('.video-container img');
+
+        const bootSequence = setInterval(() => {
+            if (step < logs.length) {
+                logEl.innerText = logs[step];
+                progressEl.style.width = ((step + 1) / logs.length) * 100 + "%";
+                step++;
+            } else {
+                clearInterval(bootSequence);
+                bootScreen.style.opacity = "0";
+                setTimeout(() => {
+                    bootScreen.style.display = "none";
+                    cameraImg.classList.add('camera-boot');
+                }, 500);
+            }
+        }, 300);
+    };
+
+    // HORLOGE TACTIQUE
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString();
     }, 1000);
 
-    // Mise à jour des données
-    setInterval(() => {
-        fetch('/status')
-            .then(r => r.json())
-            .then(data => {
-                const angle = data.angle || 0;
-                document.getElementById('angle_val').innerText = angle + "°";
-                document.getElementById('turn').innerText = data.turn.split('_').pop(); // Affiche juste FORWARD, LEFT...
-                document.getElementById('color').innerText = data.color;
+    // RÉCUPÉRATION DES DONNÉES (FETCH)
+    async function updateData() {
+        try {
+            const response = await fetch('/status');
+            const data = await response.json();
 
-                const percentage = ((angle + 45) / 90) * 100;
-                document.getElementById('angle-cursor').style.left = percentage + "%";
+            // 1. Mise à jour de l'angle et du curseur
+            const angle = data.angle || 0;
+            document.getElementById('angle_val').innerText = angle + "°";
+            const percentage = ((angle + 45) / 90) * 100;
+            document.getElementById('angle-cursor').style.left = Math.min(Math.max(percentage, 0), 100) + "%";
 
-                const card = document.getElementById('color-card');
-                if(data.color !== "NONE" && data.color !== "") {
-                    card.style.borderColor = getCSSColor(data.color);
-                    card.style.background = "rgba(0, 255, 65, 0.1)";
-                } else {
-                    card.style.borderColor = "var(--neon-green)";
-                    card.style.background = "var(--panel-bg)";
-                }
-            })
-            .catch(() => {});
-    }, 100);
+            // 2. Mise à jour de l'indication de virage (On nettoie le préfixe de couleur)
+            // Python envoie "ROUGE_LEFT", on ne garde que "LEFT"
+            const fullHint = data.hint || "SEARCHING";
+            const cleanHint = fullHint.includes('_') ? fullHint.split('_')[1] : fullHint;
+            document.getElementById('turn').innerText = cleanHint;
+
+            // 3. Mise à jour de la couleur cible
+            const colorName = data.color || "NONE";
+            const colorDisplay = document.getElementById('color');
+            const card = document.getElementById('color-card');
+            
+            colorDisplay.innerText = colorName;
+
+            if(colorName !== "NONE" && colorName !== "") {
+                const hexColor = getCSSColor(colorName);
+                card.style.borderLeftColor = hexColor;
+                card.style.boxShadow = `inset 5px 0 10px ${hexColor}33`; // Ajoute une lueur de la couleur détectée
+            } else {
+                card.style.borderLeftColor = "var(--neon-green)";
+                card.style.boxShadow = "none";
+            }
+        } catch (err) {
+            // En cas d'erreur, on ne bloque pas le système
+        } finally {
+            // On relance la mise à jour après 100ms pour éviter de saturer le réseau
+            setTimeout(updateData, 100);
+        }
+    }
 
     function getCSSColor(colorName) {
-        const colors = { "JAUNE": "#ffff00", "BLEU": "#0000ff", "ROUGE": "#ff0000", "VERT": "#00ff00" };
+        const colors = { 
+            "JAUNE": "#ffff00", 
+            "BLEU": "#0088ff", 
+            "ROUGE": "#ff3333", 
+            "VERT": "#33ff33" 
+        };
         return colors[colorName] || "var(--neon-green)";
     }
+
+    // Lancement de la boucle de données
+    updateData();
 </script>
 
 </body>
