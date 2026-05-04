@@ -60,6 +60,9 @@ class ServeurHotspot {
   +validerMessage()
   +routerEvenement()
   +diffuser()
+  +broadcast_system()
+  +move_robot()
+  +handler()
 }
 
 %% ===================== ROBOT =====================
@@ -81,11 +84,40 @@ class EcranRobot {
   +alerteUrgence()
 }
 
+class SlayBotTactical {
+  +string etat
+  +bool connected
+  +run_boot()
+  +listen()
+  +handle_click()
+  +update_ui()
+  +blink_logic()
+  +draw_face()
+}
+
+class SlayBotVision {
+  +float angle
+  +PIDController pid
+  +_vision_engine()
+  +calculate_angle()
+  +update_pid()
+  +send_angle()
+}
+
 %% ===================== SIMULATEUR =====================
 
 class Simulateur {
   +simulerTrajet()
   +genererEvenements()
+}
+
+class RobotSimulator {
+  +List tasks
+  +Dict positions
+  +add_task()
+  +update_robot_logic()
+  +move_step()
+  +paintEvent()
 }
 
 %% ===================== RELATIONS + CARDINALITÉS =====================
@@ -111,6 +143,11 @@ ServeurHotspot "1" --> "1..*" TableESP32 : met à jour
 
 %% Robot UI
 Robot "1" --> "1" EcranRobot : synchronisation
+Robot "1" --> "1" SlayBotTactical : interface
+Robot "1" --> "1" SlayBotVision : vision
+
+%% Simulateur
+Simulateur "1" --> "1" RobotSimulator : implémentation
 ```
 
 ### Diagramme de SÉQUENCE

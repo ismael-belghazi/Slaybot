@@ -28,6 +28,7 @@ SlayBot est un système modulaire et interconnecté permettant :
 
 - **[site_commande](site_commande.md)** : Application web et dashboard.
 - **[slaybot_apk](slaybot_apk.md)** : Application mobile de contrôle.
+- **[slaybot_camera](slaybot_camera.md)** : Système de vision pour navigation.
 - **[slaybot_hotspot](slaybot_hotspot.md)** : Serveur central et hotspot.
 - **[slaybot_screen](slaybot_screen.md)** : Interface tactile du robot.
 - **[slaybot_table](slaybot_table.md)** : Bouton de service des tables.

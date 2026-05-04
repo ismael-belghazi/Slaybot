@@ -1,53 +1,108 @@
 # slaybot_hotspot
 
-Le module `slaybot_hotspot` fournit le hotspot Wi-Fi et le serveur WebSocket central du système SlayBot.
+Le module `slaybot_hotspot` constitue le cerveau central du système SlayBot, gérant le hotspot WiFi, le serveur WebSocket de communication, et l'interface de monitoring système.
 
-## But du module
+## Objectif
 
-`slaybot_hotspot` centralise la communication entre :
-
-- l’application Android (`slaybot_apk`)
-- l’interface robot embarquée (`slaybot_screen`)
-- les modules table ESP32 (`slaybot_table`)
-- le site de commande web (`site_commande`)
+Fournir l'infrastructure réseau et de communication pour :
+- Créer un réseau WiFi isolé pour tous les composants.
+- Orchestrer les communications temps réel via WebSocket.
+- Piloter les déplacements du robot via scripts Python.
+- Surveiller les métriques système (CPU, RAM, réseau).
+- Gérer les arrêts d'urgence et la diffusion d'événements.
 
 ## Composants
 
-- `install.sh` : script d'installation du hotspot.
-- `serveur_cerveau.py` : serveur WebSocket principal.
-- `robot.service` : configuration systemd.
-- `requirements.txt` : dépendances Python.
+- `serveur_cerveau.py` : Serveur WebSocket asynchrone avec gestion des connexions et routage.
+- `app.py` : Interface web Flask pour monitoring système.
+- `templates/index.html` : Dashboard de surveillance avec métriques temps réel.
+- `install-hotspot.sh` : Installation automatique hotspot et dépendances.
+- `robot.service` : Service systemd pour démarrage automatique.
+- `requirements.txt` : Dépendances (websockets, flask, psutil).
 
-## Installation
+## Classes et fonctions principales
 
-1. Copier les fichiers sur le Raspberry Pi.
-2. Rendre le script exécutable :
+### Fonctions serveur_cerveau.py
+- `broadcast_system(message, exclude_path)` : Diffusion à tous clients.
+- `move_robot(target_type, target_id)` : Lance script pilotage.
+- `emergency_stop()` : Arrêt d'urgence, terminaison processus.
+- `handler(websocket)` : Gestionnaire connexions WebSocket.
 
+### Routes Flask (app.py)
+- `/` : Dashboard monitoring.
+- `/stats` : API JSON métriques système.
+
+## Endpoints WebSocket
+
+- `/` : Connexion générale (APK, site web, tables).
+- `/pilote` : Données pilotage (angle, couleur) caméra.
+
+## Flux de communication
+
+### Réception commande
+1. Site envoie `order/table/5`.
+2. Diffusion à APK et robot.
+3. APK valide, envoie `go/table/5`.
+4. Serveur lance `pilote.py table 5`.
+5. Arrivée : `arrived/table/5`.
+
+### Pilotage automatique
+- Caméra envoie `{"angle": 15, "color": "JAUNE"}` à `/pilote`.
+- Stocké dans `/dev/shm/steering_angle`.
+- Script lit angle pour ajustements direction.
+
+## Messages supportés
+
+### Reçus
+- `go/table/X` : Déplacement table X.
+- `go/bar` : Retour bar.
+- `emergency_stop` : Arrêt urgence.
+- `status/received` : Confirmation livraison.
+
+### Envoyés
+- `arrived/table/X` : Arrivée table X.
+- `arrived/bar` : Arrivée bar.
+- `emergency_stop` : Signal urgence.
+
+## Installation et configuration
+
+### Installation automatique
 ```bash
-chmod +x install.sh
+chmod +x install-hotspot.sh
+./install-hotspot.sh
+# Option 0 : hotspot complet
 ```
 
-3. Lancer l'installation :
+### Configuration réseau
+- SSID : `Slaybot`
+- Password : `MHI-Hotspot`
+- IP : `10.42.0.1`
+- Port WS : `8765`
+- Port web : `5000`
 
+### Démarrage service
 ```bash
-./install.sh
+sudo systemctl enable robot.service
+sudo systemctl start robot.service
 ```
-
-4. Choisir l'option `0` pour activer le hotspot.
-
-## Fonctionnement du serveur
-
-- Écoute WebSocket sur `0.0.0.0:8765`.
-- Diffuse les messages reçus à tous les clients connectés.
-- Gère les commandes selon leur préfixe.
 
 ## API du module
 
 ::: slaybot_hotspot.serveur_cerveau
+::: slaybot_hotspot.app
 
-## Messages supportés
+## Maintenance
 
-- `go/X` : déplacement vers la table X
+- **Service** : `sudo systemctl status robot`
+- **Logs** : `journalctl -u robot -f`
+- **Redémarrer** : `sudo systemctl restart robot`
+- **Monitoring** : `http://10.42.0.1:5000/`
+
+## Dépannage
+
+- **Connexion perdue** : Vérifier wlan0 (AP) et wlan1 (internet).
+- **Processus bloqué** : Arrêt urgence depuis APK.
+- **Température** : Surveiller via dashboard (>70°C ventiler).
 - `clean/table/X` : demande de nettoyage via table X
 - `order/table/X` : nouvelle commande de la table X
 - `ready/table/X` : notification de préparation

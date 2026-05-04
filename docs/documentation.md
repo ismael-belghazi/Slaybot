@@ -16,7 +16,10 @@ Ce projet utilise MkDocs pour générer un site de documentation statique.
 ### Installer MkDocs
 
 Dans un environnement virtuel Python Windows :
-
+pour activer votre environnement virtuel  si vous en avait un:
+```bash 
+.\.venv\Scripts\activate 
+```
 ```bash
 .\.venv\Scripts\python.exe -m pip install -r docs/requirements.txt
 ```

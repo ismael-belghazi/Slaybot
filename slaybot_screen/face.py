@@ -10,7 +10,7 @@ import math
 SERVER_IP = "10.42.0.1"
 PORT = 8765
 ADMIN_PASSWORD = "2403"
-VERSION = "v3.1-MHI-INC"
+VERSION = "v4.1-MHI-INC"
 
 class SlayBotTactical:
     def __init__(self, root):
@@ -25,6 +25,7 @@ class SlayBotTactical:
         self.root.geometry(f"{self.w}x{self.h}+0+0")
         self.root.attributes("-topmost", True)
         self.root.config(cursor="none")
+        self.frame_count = 0
         self.pulse_val=0
         self.pulse_dir=1
         # System State
@@ -205,33 +206,34 @@ class SlayBotTactical:
         tk.Button(win, text="[ CLOSE UI ]", bg="#300", fg="red", command=lambda: press('EXIT')).pack(fill="x", pady=10)
 
     # --- DESSIN & UI ---
-# --- DESSIN & UI (VERSION STABLE) ---
     def update_ui(self):
         try:
             self.canvas.delete("all")
+            self.frame_count += 1 # Incrémentation pour les calculs mathématiques
             cx, cy = self.w/2, self.h/2
+
+            # Détermination de la couleur globale
+            main_color = "#0f0" if (self.connected and self.state != "emergency") else "#f00"
 
             # 1. Scanlines CRT (Fond)
             for i in range(0, self.h, 4):
                 self.canvas.create_line(0, i, self.w, i, fill="#000700")
 
-            # 2. Effet Radar (Sécurisé sans stipple)
-            # On utilise une ligne avec une couleur très sombre pour simuler le scan
-            scan_y = (time.time() * 150) % self.h
+            # 2. Effet Radar
+            scan_y = (self.frame_count * 5) % self.h
             self.canvas.create_line(0, scan_y, self.w, scan_y, fill="#003300", width=2)
 
             if self.state == "booting":
                 self.draw_boot_screen(cx, cy)
             else:
                 self.draw_tactical_hud(cx, cy)
-                self.draw_face(cx, cy)
+                # ON PASSE main_color ICI
+                self.draw_face(cx, cy, main_color)
                 self.draw_tactical_buttons()
 
         except Exception as e:
-            # Si ça plante, on l'affiche en console mais on ne stoppe pas le programme
             print(f"UI DRAW ERROR: {e}")
         
-        # On relance quoi qu'il arrive
         self.root.after(16, self.update_ui)
 
     def draw_boot_screen(self, cx, cy):
@@ -255,49 +257,51 @@ class SlayBotTactical:
         
         self.canvas.create_text(20, self.h-30, text=f"> {status} | {self.state.upper()} | {VERSION}", fill=color, anchor="w", font=("Courier", 12))
 
-    def draw_face(self, cx, cy):
-        scale = self.h / 1000
-        color = "#0f0" if (self.connected and self.state != "emergency") else "#f00"
+    def draw_face(self, cx, cy, color):
+        s = self.h / 1000 
         glow_color = "#001a00" if color == "#0f0" else "#1a0000"
         
-        # Animation pulse ultra-simplifiée pour éviter les erreurs de calcul
-        self.pulse_val += 4 * self.pulse_dir
-        if self.pulse_val > 100 or self.pulse_val < 0: self.pulse_dir *= -1
-        
-        # Yeux
-        for side in [-1, 1]:
-            ex, ey = cx + (side * 160 * scale), cy - 40 * scale
-            h = 80 * scale * self.eye_height
-            # Lueur (Cercle plus large et sombre dessous)
-            self.canvas.create_oval(ex-65*scale, ey-h-5, ex+65*scale, ey+h+5, outline=glow_color, width=5)
-            # Principal
-            self.canvas.create_oval(ex-60*scale, ey-h, ex+60*scale, ey+h, outline=color, width=3)
-            if self.eye_height > 0.5:
-                self.canvas.create_oval(ex-15*scale, ey-15*scale, ex+15*scale, ey+15*scale, fill=color)
+        # --- 1. LE NOEUD PAPILLON ---
+        bx, by = cx, cy + 240 * s
+        bw, bh = 50 * s, 28 * s
+        self.canvas.create_polygon(bx, by, bx-bw, by-bh, bx-bw, by+bh, outline=color, fill="#000500", width=2)
+        self.canvas.create_polygon(bx, by, bx+bw, by-bh, bx+bw, by+bh, outline=color, fill="#000500", width=2)
+        self.canvas.create_rectangle(bx-8*s, by-8*s, bx+8*s, by+8*s, outline=color, fill=color)
 
-        # Bouche / Bouton Confirmation
-        my = cy + 150 * scale
+        # --- 2. EXPRESSIONS ---
+        if self.state == "moving":
+            mouth_curve, eyebrow_lift = 0.5, -12 * s
+        elif self.state == "emergency" or not self.connected:
+            mouth_curve, eyebrow_lift = -1.2, -25 * s
+        elif self.state == "arrived":
+            mouth_curve, eyebrow_lift = 1.8, 15 * s
+        else:
+            mouth_curve, eyebrow_lift = 0.2, 0
+
+        # --- 3. LES YEUX ---
+        for side in [-1, 1]:
+            ex = cx + (side * 160 * s)
+            ey = cy - 40 * s + eyebrow_lift
+            h = 80 * s * self.eye_height
+            self.canvas.create_oval(ex-65*s, ey-h-5, ex+65*s, ey+h+5, outline=glow_color, width=2)
+            self.canvas.create_oval(ex-60*s, ey-h, ex+60*s, ey+h, outline=color, width=4)
+            
+            if self.eye_height > 0.5:
+                # Utilisation de frame_count pour le balayage du regard
+                px = math.sin(self.frame_count * 0.05) * 10 * s if self.state == "idle" else 0
+                self.canvas.create_oval(ex-15*s+px, ey-15*s, ex+15*s+px, ey+15*s, fill=color)
+
+        # --- 4. LA BOUCHE ---
+        my = cy + 150 * s
         if self.state == "arrived":
-            bw, bh = 240 * scale, 70 * scale
-            # Fond bouton
-            self.canvas.create_rectangle(cx-bw, my+20, cx+bw, my+20+bh, outline=color, width=4, fill="#000800")
+            bw_btn, bh_btn = 240 * s, 70 * s
+            self.canvas.create_rectangle(cx-bw_btn, my, cx+bw_btn, my+bh_btn, outline=color, width=4, fill="#000800")
+            self.canvas.create_text(cx, my+bh_btn/2, text=">> CONFIRM SYSTEM <<", fill=color, font=("Courier", int(18*s), "bold"))
+        else:
+            mw = 90 * s
+            ctrl_y = my + (mouth_curve * 40 * s)
+            self.canvas.create_line(cx-mw, my, cx, ctrl_y, cx+mw, my, fill=color, width=6, smooth=True, capstyle="round")
             
-            # Texte (On simplifie la couleur pour éviter le crash de formatage hex)
-            self.canvas.create_text(cx, my+20+(bh/2), 
-                                    text=">> CONFIRM SYSTEM <<", 
-                                    fill=color, font=("Courier", int(18*scale), "bold"))
-            
-            # Décorations (Lignes tactiques)
-            self.canvas.create_line(cx-bw-30, my+20+bh/2, cx-bw, my+20+bh/2, fill=color, width=2)
-            self.canvas.create_line(cx+bw+30, my+20+bh/2, cx+bw, my+20+bh/2, fill=color, width=2)
-            
-        elif color == "#f00": # Mode Urgence ou Déconnecté
-            points = [cx-60*scale, my, cx-30*scale, my+20*scale, cx, my, cx+30*scale, my+20*scale, cx+60*scale, my]
-            self.canvas.create_line(points, fill=color, width=5, capstyle="round")
-        else: # Mode IDLE (Simple ligne avec lueur)
-            self.canvas.create_line(cx-50*scale, my, cx+50*scale, my, fill=glow_color, width=10)
-            self.canvas.create_line(cx-50*scale, my, cx+50*scale, my, fill=color, width=4)
-    
     def draw_tactical_buttons(self):
         # Bouton Paramètres (CMD)
         self.canvas.create_rectangle(self.w-70, self.h-70, self.w-20, self.h-20, outline="#0f0", width=2)
