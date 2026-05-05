@@ -1,0 +1,57 @@
+:root [data-md-color-scheme="slate"] {
+    --md-primary-fg-color: #000000;
+    --md-accent-fg-color: #00ff41; 
+    --md-default-fg-color: #00ff41;
+    --md-default-bg-color: #050505;
+    --md-code-bg-color: #000000;
+    --md-typeset-color: #00ff41;
+    --md-typeset-a-color: #00cc33;
+    --md-admonition-fg-color: #00ff41;
+}
+
+h1::after, h2:hover::after {
+    content: "█";
+    animation: blink 1s step-end infinite;
+    margin-left: 10px;
+    color: #00ff41;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+[data-md-color-scheme="slate"] .mermaid svg {
+    background-color: #000 !important;
+    border: 1px solid #00ff41;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+}
+
+[data-md-color-scheme="slate"] .mermaid .edgePath path {
+    stroke: #00ff41 !important;
+    stroke-width: 2px;
+}
+
+[data-md-color-scheme="slate"] .mermaid .label text,
+[data-md-color-scheme="slate"] .mermaid .edgeLabel {
+    fill: #00ff41 !important;
+    color: #00ff41 !important;
+    font-family: 'Roboto Mono', monospace !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .node rect,
+[data-md-color-scheme="slate"] .mermaid .node circle,
+[data-md-color-scheme="slate"] .mermaid .node polygon {
+    stroke: #00ff41 !important;
+    fill: #000 !important;
+    stroke-width: 2px;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #008f11; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #00ff41; box-shadow: 0 0 10px #00ff41; }
+
+.md-typeset pre code {
+    border: 1px solid #004411;
+    background-color: #000 !important;
+}

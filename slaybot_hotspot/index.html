@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Documentation complète et générée automatiquement du projet SlayBot">
+        <meta name="description" content="Documentation technique complète du projet SlayBot.">
       
       
         <meta name="author" content="MHI-Inc">
@@ -18,23 +18,30 @@
       
         <link rel="next" href="../slaybot_screen/">
       
-      <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
-    
-    
-      
-        <title>slaybot_hotspot - SlayBot Documentation</title>
-      
-    
-    
-      <link rel="stylesheet" href="../assets/stylesheets/main.f79797b0.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Hotspot - SlayBot Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
+
     
+    
+      
     
     
       
@@ -48,11 +55,12 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
-    
     
     
   </head>
@@ -60,12 +68,13 @@
   
     
     
+      
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="green">
   
-    
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -90,11 +99,12 @@
     <a href=".." title="SlayBot Documentation" class="md-header__button md-logo" aria-label="SlayBot Documentation" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -106,57 +116,93 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              slaybot_hotspot
+              Hotspot
             
           </span>
         </div>
       </div>
     </div>
     
+      
+        <form class="md-header__option" data-md-component="palette">
+  
     
     
-      <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="green"  aria-label="Mode Terminal"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Mode Terminal" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 19V7H4v12zm0-16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm-7 14v-2h5v2zm-3.42-4L5.57 9H8.4l3.3 3.3c.39.39.39 1.03 0 1.42L8.42 17H5.59z"/></svg>
       </label>
-      <div class="md-search" data-md-component="search" role="dialog">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="grey" data-md-color-accent="green"  aria-label="Mode Clair"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Mode Clair" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 20a1 1 0 0 0-1-1h-1v-2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4v2h-1a1 1 0 0 0-1 1H2v2h7a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1h7v-2zm-8-5V5h10v10zm1-8.11 3.56 3.56L8 14h2.53l2.92-2.92c.33-.34.33-.9 0-1.26L10.5 6.89zm8 5.33h-2.67V14H16z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Rechercher" placeholder="Rechercher" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Search">
+      <nav class="md-search__options" aria-label="Recherche">
         
         <button type="reset" class="md-search__icon md-icon" title="Effacer" aria-label="Effacer" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </nav>
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initialisation de la recherche
           </div>
-          <ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
         </div>
       </div>
     </div>
   </div>
 </div>
+      
     
     
       <div class="md-header__source">
         <a href="https://github.com/ismael-belghazi/Slaybot" title="Aller au dépôt" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    GitHub/SlayBot
+    ismael-belghazi/Slaybot
   </div>
 </a>
       </div>
@@ -172,70 +218,23 @@
           
             
 <nav class="md-tabs" aria-label="Onglets" data-md-component="tabs">
-  <div class="md-tabs__inner md-grid">
+  <div class="md-grid">
     <ul class="md-tabs__list">
       
         
   
   
-
-
-  <li class="md-tabs__item">
-    <a href=".." class="md-tabs__link">
-      Accueil
-    </a>
-  </li>
-
-      
-        
   
   
-
-
-  <li class="md-tabs__item">
-    <a href="../architecture/" class="md-tabs__link">
-      Architecture
-    </a>
-  </li>
-
-      
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href="../documentation/" class="md-tabs__link">
-      Documentation de déploiement
-    </a>
-  </li>
-
-      
-        
-  
-  
-
-
-  <li class="md-tabs__item">
-    <a href="../installation/" class="md-tabs__link">
-      Installation
-    </a>
-  </li>
-
-      
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
         
   
   
     
   
+  Accueil
 
-
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../site_commande/" class="md-tabs__link md-tabs__link--active">
-        Modules
       </a>
     </li>
   
@@ -244,28 +243,81 @@
         
   
   
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../architecture/" class="md-tabs__link">
+          
+  
+  
+  Conception
 
-
-  <li class="md-tabs__item">
-    <a href="../api/" class="md-tabs__link">
-      API
-    </a>
-  </li>
+        </a>
+      </li>
+    
+  
 
       
         
   
   
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../site_commande/" class="md-tabs__link">
+          
+  
+  
+  Modules
 
+        </a>
+      </li>
+    
+  
 
+      
+        
+  
   
   
   
     <li class="md-tabs__item">
-      <a href="../contributing/" class="md-tabs__link">
-        Informations
+      <a href="../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
       </a>
     </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../contributing/" class="md-tabs__link">
+          
+  
+  
+  Informations
+
+        </a>
+      </li>
+    
   
 
       
@@ -285,6 +337,7 @@
                   <div class="md-sidebar__inner">
                     
 
+
   
 
 
@@ -293,7 +346,7 @@
     <a href=".." title="SlayBot Documentation" class="md-nav__button md-logo" aria-label="SlayBot Documentation" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     SlayBot Documentation
@@ -303,10 +356,10 @@
       <a href="https://github.com/ismael-belghazi/Slaybot" title="Aller au dépôt" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    GitHub/SlayBot
+    ismael-belghazi/Slaybot
   </div>
 </a>
     </div>
@@ -315,14 +368,26 @@
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href=".." class="md-nav__link">
-        Accueil
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
@@ -330,129 +395,305 @@
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
       
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conception
+  
 
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Conception
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../architecture/" class="md-nav__link">
-        Architecture
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
-    
-      
-      
-      
-
+              
+            
+              
+                
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../documentation/" class="md-nav__link">
-        Documentation de déploiement
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
   
   
   
     <li class="md-nav__item">
       <a href="../installation/" class="md-nav__link">
-        Installation
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Déploiement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
   
   
     
   
   
+  
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+    
+    
+      
+        
+        
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5">
-          Modules
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Modules" data-md-level="1">
-        <label class="md-nav__title" for="__nav_5">
-          <span class="md-nav__icon md-icon"></span>
-          Modules
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
           
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../site_commande/" class="md-nav__link">
-        site_commande
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Site Commande
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../slaybot_apk/" class="md-nav__link">
-        slaybot_apk
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    APK
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
     
   
   
+  
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
         
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          slaybot_hotspot
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hotspot
+  
+
+    
+  </span>
+  
+  
+
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        slaybot_hotspot
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hotspot
+  
+
+    
+  </span>
+  
+  
+
       </a>
       
         
@@ -471,65 +712,108 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#but-du-module" class="md-nav__link">
-    But du module
+  <a href="#objectif" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectif
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#composants" class="md-nav__link">
-    Composants
+    <span class="md-ellipsis">
+      
+        Composants
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
-  </a>
-  
-</li>
+  <a href="#classes-et-fonctions-principales" class="md-nav__link">
+    <span class="md-ellipsis">
       
-        <li class="md-nav__item">
-  <a href="#fonctionnement-du-serveur" class="md-nav__link">
-    Fonctionnement du serveur
-  </a>
-  
-</li>
+        Classes et fonctions principales
       
-        <li class="md-nav__item">
-  <a href="#api-du-module" class="md-nav__link">
-    API du module
+    </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau" class="md-nav__link">
-    serveur_cerveau
-  </a>
-  
-    <nav class="md-nav" aria-label="serveur_cerveau">
+    <nav class="md-nav" aria-label="Classes et fonctions principales">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau-functions" class="md-nav__link">
-    Functions
+  <a href="#fonctions-serveur_cerveaupy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fonctions serveur_cerveau.py
+      
+    </span>
   </a>
   
-    <nav class="md-nav" aria-label="Functions">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.broadcast_system" class="md-nav__link">
-    broadcast_system
+  <a href="#routes-flask-apppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routes Flask (app.py)
+      
+    </span>
   </a>
   
 </li>
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#endpoints-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endpoints WebSocket
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flux-de-communication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flux de communication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flux de communication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reception-commande" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Réception commande
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pilotage-automatique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pilotage automatique
+      
+    </span>
+  </a>
   
 </li>
         
@@ -540,28 +824,194 @@
       
         <li class="md-nav__item">
   <a href="#messages-supportes" class="md-nav__link">
-    Messages supportés
+    <span class="md-ellipsis">
+      
+        Messages supportés
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Messages supportés">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reçus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#envoyes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Envoyés
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-et-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation et configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation et configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-automatique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation automatique
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-reseau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration réseau
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demarrage-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Démarrage service
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-du-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API du module
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slaybot_hotspot.serveur_cerveau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        serveur_cerveau
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="serveur_cerveau">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slaybot_hotspot.serveur_cerveau.broadcast_system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        broadcast_system
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slaybot_hotspot.app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        app
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#notes-de-maintenance" class="md-nav__link">
-    Notes de maintenance
+    <span class="md-ellipsis">
+      
+        Notes de maintenance
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#architecture-reseau" class="md-nav__link">
-    Architecture réseau
+    <span class="md-ellipsis">
+      
+        Architecture réseau
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#logs-et-maintenance" class="md-nav__link">
-    Logs et maintenance
+    <span class="md-ellipsis">
+      
+        Logs et maintenance
+      
+    </span>
   </a>
   
 </li>
@@ -573,66 +1023,149 @@
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../slaybot_screen/" class="md-nav__link">
-        slaybot_screen
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Screen
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../slaybot_table/" class="md-nav__link">
-        slaybot_table
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Table
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../slaybot_utilitaire_dev/" class="md-nav__link">
-        slaybot_utilitaire_dev
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utilitaires Dev
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../slaybot_camera/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Caméra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href="../api/" class="md-nav__link">
-        API
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
@@ -640,76 +1173,141 @@
     
       
       
-      
-
+  
   
   
   
     
+    
+    
+    
+      
+      
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_7">
-          Informations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Informations" data-md-level="1">
-        <label class="md-nav__title" for="__nav_7">
-          <span class="md-nav__icon md-icon"></span>
-          Informations
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
           
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Informations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Informations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../contributing/" class="md-nav__link">
-        Contribution
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribution
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../license/" class="md-nav__link">
-        Licence
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Licence
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../code_of_conduct/" class="md-nav__link">
-        Règle de conduite
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code de conduite
+  
+
+    
+  </span>
+  
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -741,65 +1339,108 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#but-du-module" class="md-nav__link">
-    But du module
+  <a href="#objectif" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objectif
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#composants" class="md-nav__link">
-    Composants
+    <span class="md-ellipsis">
+      
+        Composants
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
-  </a>
-  
-</li>
+  <a href="#classes-et-fonctions-principales" class="md-nav__link">
+    <span class="md-ellipsis">
       
-        <li class="md-nav__item">
-  <a href="#fonctionnement-du-serveur" class="md-nav__link">
-    Fonctionnement du serveur
-  </a>
-  
-</li>
+        Classes et fonctions principales
       
-        <li class="md-nav__item">
-  <a href="#api-du-module" class="md-nav__link">
-    API du module
+    </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau" class="md-nav__link">
-    serveur_cerveau
-  </a>
-  
-    <nav class="md-nav" aria-label="serveur_cerveau">
+    <nav class="md-nav" aria-label="Classes et fonctions principales">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau-functions" class="md-nav__link">
-    Functions
+  <a href="#fonctions-serveur_cerveaupy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fonctions serveur_cerveau.py
+      
+    </span>
   </a>
   
-    <nav class="md-nav" aria-label="Functions">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
-  <a href="#slaybot_hotspot.serveur_cerveau.broadcast_system" class="md-nav__link">
-    broadcast_system
+  <a href="#routes-flask-apppy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routes Flask (app.py)
+      
+    </span>
   </a>
   
 </li>
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#endpoints-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endpoints WebSocket
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flux-de-communication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flux de communication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flux de communication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reception-commande" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Réception commande
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pilotage-automatique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pilotage automatique
+      
+    </span>
+  </a>
   
 </li>
         
@@ -810,28 +1451,194 @@
       
         <li class="md-nav__item">
   <a href="#messages-supportes" class="md-nav__link">
-    Messages supportés
+    <span class="md-ellipsis">
+      
+        Messages supportés
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Messages supportés">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reçus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#envoyes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Envoyés
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-et-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation et configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation et configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-automatique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation automatique
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-reseau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration réseau
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demarrage-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Démarrage service
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-du-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API du module
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slaybot_hotspot.serveur_cerveau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        serveur_cerveau
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="serveur_cerveau">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slaybot_hotspot.serveur_cerveau.broadcast_system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        broadcast_system
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slaybot_hotspot.app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        app
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#depannage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dépannage
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#notes-de-maintenance" class="md-nav__link">
-    Notes de maintenance
+    <span class="md-ellipsis">
+      
+        Notes de maintenance
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#architecture-reseau" class="md-nav__link">
-    Architecture réseau
+    <span class="md-ellipsis">
+      
+        Architecture réseau
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#logs-et-maintenance" class="md-nav__link">
-    Logs et maintenance
+    <span class="md-ellipsis">
+      
+        Logs et maintenance
+      
+    </span>
   </a>
   
 </li>
@@ -846,50 +1653,99 @@
           
           
             <div class="md-content" data-md-component="content">
+              
               <article class="md-content__inner md-typeset">
                 
                   
 
 
+  
+  
+
 
 <h1 id="slaybot_hotspot">slaybot_hotspot<a class="headerlink" href="#slaybot_hotspot" title="Permanent link">&para;</a></h1>
-<p>Le module <code>slaybot_hotspot</code> fournit le hotspot Wi-Fi et le serveur WebSocket central du système SlayBot.</p>
-<h2 id="but-du-module">But du module<a class="headerlink" href="#but-du-module" title="Permanent link">&para;</a></h2>
-<p><code>slaybot_hotspot</code> centralise la communication entre :</p>
-<ul>
-<li>l’application Android (<code>slaybot_apk</code>)</li>
-<li>l’interface robot embarquée (<code>slaybot_screen</code>)</li>
-<li>les modules table ESP32 (<code>slaybot_table</code>)</li>
-<li>le site de commande web (<code>site_commande</code>)</li>
-</ul>
+<p>Le module <code>slaybot_hotspot</code> constitue le cerveau central du système SlayBot, gérant le hotspot WiFi, le serveur WebSocket de communication, et l'interface de monitoring système.</p>
+<h2 id="objectif">Objectif<a class="headerlink" href="#objectif" title="Permanent link">&para;</a></h2>
+<p>Fournir l'infrastructure réseau et de communication pour :
+- Créer un réseau WiFi isolé pour tous les composants.
+- Orchestrer les communications temps réel via WebSocket.
+- Piloter les déplacements du robot via scripts Python.
+- Surveiller les métriques système (CPU, RAM, réseau).
+- Gérer les arrêts d'urgence et la diffusion d'événements.</p>
 <h2 id="composants">Composants<a class="headerlink" href="#composants" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>install.sh</code> : script d'installation du hotspot.</li>
-<li><code>serveur_cerveau.py</code> : serveur WebSocket principal.</li>
-<li><code>robot.service</code> : configuration systemd.</li>
-<li><code>requirements.txt</code> : dépendances Python.</li>
+<li><code>serveur_cerveau.py</code> : Serveur WebSocket asynchrone avec gestion des connexions et routage.</li>
+<li><code>app.py</code> : Interface web Flask pour monitoring système.</li>
+<li><code>templates/index.html</code> : Dashboard de surveillance avec métriques temps réel.</li>
+<li><code>install-hotspot.sh</code> : Installation automatique hotspot et dépendances.</li>
+<li><code>robot.service</code> : Service systemd pour démarrage automatique.</li>
+<li><code>requirements.txt</code> : Dépendances (websockets, flask, psutil).</li>
 </ul>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Copier les fichiers sur le Raspberry Pi.</li>
-<li>Rendre le script exécutable :</li>
-</ol>
-<pre><code class="language-bash">chmod +x install.sh
-</code></pre>
-<ol>
-<li>Lancer l'installation :</li>
-</ol>
-<pre><code class="language-bash">./install.sh
-</code></pre>
-<ol>
-<li>Choisir l'option <code>0</code> pour activer le hotspot.</li>
-</ol>
-<h2 id="fonctionnement-du-serveur">Fonctionnement du serveur<a class="headerlink" href="#fonctionnement-du-serveur" title="Permanent link">&para;</a></h2>
+<h2 id="classes-et-fonctions-principales">Classes et fonctions principales<a class="headerlink" href="#classes-et-fonctions-principales" title="Permanent link">&para;</a></h2>
+<h3 id="fonctions-serveur_cerveaupy">Fonctions serveur_cerveau.py<a class="headerlink" href="#fonctions-serveur_cerveaupy" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Écoute WebSocket sur <code>0.0.0.0:8765</code>.</li>
-<li>Diffuse les messages reçus à tous les clients connectés.</li>
-<li>Gère les commandes selon leur préfixe.</li>
+<li><code>broadcast_system(message, exclude_path)</code> : Diffusion à tous clients.</li>
+<li><code>move_robot(target_type, target_id)</code> : Lance script pilotage.</li>
+<li><code>emergency_stop()</code> : Arrêt d'urgence, terminaison processus.</li>
+<li><code>handler(websocket)</code> : Gestionnaire connexions WebSocket.</li>
 </ul>
+<h3 id="routes-flask-apppy">Routes Flask (app.py)<a class="headerlink" href="#routes-flask-apppy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>/</code> : Dashboard monitoring.</li>
+<li><code>/stats</code> : API JSON métriques système.</li>
+</ul>
+<h2 id="endpoints-websocket">Endpoints WebSocket<a class="headerlink" href="#endpoints-websocket" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>/</code> : Connexion générale (APK, site web, tables).</li>
+<li><code>/pilote</code> : Données pilotage (angle, couleur) caméra.</li>
+</ul>
+<h2 id="flux-de-communication">Flux de communication<a class="headerlink" href="#flux-de-communication" title="Permanent link">&para;</a></h2>
+<h3 id="reception-commande">Réception commande<a class="headerlink" href="#reception-commande" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Site envoie <code>order/table/5</code>.</li>
+<li>Diffusion à APK et robot.</li>
+<li>APK valide, envoie <code>go/table/5</code>.</li>
+<li>Serveur lance <code>pilote.py table 5</code>.</li>
+<li>Arrivée : <code>arrived/table/5</code>.</li>
+</ol>
+<h3 id="pilotage-automatique">Pilotage automatique<a class="headerlink" href="#pilotage-automatique" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Caméra envoie <code>{"angle": 15, "color": "JAUNE"}</code> à <code>/pilote</code>.</li>
+<li>Stocké dans <code>/dev/shm/steering_angle</code>.</li>
+<li>Script lit angle pour ajustements direction.</li>
+</ul>
+<h2 id="messages-supportes">Messages supportés<a class="headerlink" href="#messages-supportes" title="Permanent link">&para;</a></h2>
+<h3 id="recus">Reçus<a class="headerlink" href="#recus" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>go/table/X</code> : Déplacement table X.</li>
+<li><code>go/bar</code> : Retour bar.</li>
+<li><code>emergency_stop</code> : Arrêt urgence.</li>
+<li><code>status/received</code> : Confirmation livraison.</li>
+</ul>
+<h3 id="envoyes">Envoyés<a class="headerlink" href="#envoyes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>arrived/table/X</code> : Arrivée table X.</li>
+<li><code>arrived/bar</code> : Arrivée bar.</li>
+<li><code>emergency_stop</code> : Signal urgence.</li>
+</ul>
+<h2 id="installation-et-configuration">Installation et configuration<a class="headerlink" href="#installation-et-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="installation-automatique">Installation automatique<a class="headerlink" href="#installation-automatique" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>install-hotspot.sh
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>./install-hotspot.sh
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Option 0 : hotspot complet</span>
+</code></pre></div>
+<h3 id="configuration-reseau">Configuration réseau<a class="headerlink" href="#configuration-reseau" title="Permanent link">&para;</a></h3>
+<ul>
+<li>SSID : <code>Slaybot</code></li>
+<li>Password : <code>MHI-Hotspot</code></li>
+<li>IP : <code>10.42.0.1</code></li>
+<li>Port WS : <code>8765</code></li>
+<li>Port web : <code>5000</code></li>
+</ul>
+<h3 id="demarrage-service">Démarrage service<a class="headerlink" href="#demarrage-service" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>robot.service
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>robot.service
+</code></pre></div>
 <h2 id="api-du-module">API du module<a class="headerlink" href="#api-du-module" title="Permanent link">&para;</a></h2>
 
 
@@ -898,16 +1754,12 @@
 
 
 <h2 id="slaybot_hotspot.serveur_cerveau" class="doc doc-heading">
-          <code>slaybot_hotspot.serveur_cerveau</code>
+            <code>slaybot_hotspot.serveur_cerveau</code>
 
 
 <a href="#slaybot_hotspot.serveur_cerveau" class="headerlink" title="Permanent link">&para;</a></h2>
 
-  <div class="doc doc-contents first">
-
-  
-
-  <div class="doc doc-children">
+    <div class="doc doc-contents first">
 
 
 
@@ -915,28 +1767,39 @@
 
 
 
-<h3 id="slaybot_hotspot.serveur_cerveau-functions">Functions<a href="#slaybot_hotspot.serveur_cerveau-functions" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
 
 
 <div class="doc doc-object doc-function">
 
 
+<h3 id="slaybot_hotspot.serveur_cerveau.broadcast_system" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">broadcast_system</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exclude_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
-<h4 id="slaybot_hotspot.serveur_cerveau.broadcast_system" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">broadcast_system</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">exclude_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-  
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-async"><code>async</code></small>
   </span>
 
-<a href="#slaybot_hotspot.serveur_cerveau.broadcast_system" class="headerlink" title="Permanent link">&para;</a></h4>
+<a href="#slaybot_hotspot.serveur_cerveau.broadcast_system" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Envoie un message à tous les clients connectés (Tactical Robot + APK).</p>
+    <div class="doc doc-contents ">
 
-  </div>
+        <p>Envoie un message à tous les clients connectés (Tactical Robot + APK).</p>
+
+
+    </div>
 
 </div>
 
@@ -944,11 +1807,60 @@
 
   </div>
 
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="slaybot_hotspot.app" class="doc doc-heading">
+            <code>slaybot_hotspot.app</code>
+
+
+<a href="#slaybot_hotspot.app" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
   </div>
 
-</div><h2 id="messages-supportes">Messages supportés<a class="headerlink" href="#messages-supportes" title="Permanent link">&para;</a></h2>
+    </div>
+
+</div><h2 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>go/X</code> : déplacement vers la table X</li>
+<li><strong>Service</strong> : <code>sudo systemctl status robot</code></li>
+<li><strong>Logs</strong> : <code>journalctl -u robot -f</code></li>
+<li><strong>Redémarrer</strong> : <code>sudo systemctl restart robot</code></li>
+<li><strong>Monitoring</strong> : <code>http://10.42.0.1:5000/</code></li>
+</ul>
+<h2 id="depannage">Dépannage<a class="headerlink" href="#depannage" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Connexion perdue</strong> : Vérifier wlan0 (AP) et wlan1 (internet).</li>
+<li><strong>Processus bloqué</strong> : Arrêt urgence depuis APK.</li>
+<li><strong>Température</strong> : Surveiller via dashboard (&gt;70°C ventiler).</li>
 <li><code>clean/table/X</code> : demande de nettoyage via table X</li>
 <li><code>order/table/X</code> : nouvelle commande de la table X</li>
 <li><code>ready/table/X</code> : notification de préparation</li>
@@ -971,23 +1883,30 @@
 <ul>
 <li>Status du service :</li>
 </ul>
-<pre><code class="language-bash">sudo systemctl status robot.service
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>robot.service
+</code></pre></div>
 <ul>
 <li>Logs en direct :</li>
 </ul>
-<pre><code class="language-bash">journalctl -u robot.service -f
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>robot.service<span class="w"> </span>-f
+</code></pre></div>
 <ul>
 <li>Pour arrêter :</li>
 </ul>
-<pre><code class="language-bash">sudo systemctl stop robot.service
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>robot.service
+</code></pre></div>
 <ul>
 <li>Pour redémarrer :</li>
 </ul>
-<pre><code class="language-bash">sudo systemctl restart robot.service
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>robot.service
+</code></pre></div>
+
+
+
+
+
+
+
 
 
 
@@ -998,7 +1917,14 @@
             </div>
           
           
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
         
       </main>
       
@@ -1016,19 +1942,6 @@
   
 </div>
       
-        <div class="md-social">
-  
-    
-    
-      
-      
-    
-    <a href="https://github.com/ismael-belghazi/Slaybot" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
-    </a>
-  
-</div>
-      
     </div>
   </div>
 </footer>
@@ -1038,10 +1951,14 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tabs", "content.code.copy", "header.autohide"], "search": "../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.5cf534bf.min.js"></script>
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "content.code.copy", "header.autohide"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
