@@ -55,7 +55,16 @@ cd slaybot_apk
 docker compose run --rm kivy-apk buildozer android debug
 ```
 
-L'APK générée sera dans `bin/`.
+### `slaybot_camera` (vision robot)
+
+```bash
+cd slaybot_camera
+chmod +x install-camera.sh
+./install-camera.sh
+python main.py
+```
+
+Accessible sur `http://localhost:8766` pour visualisation.
 
 ### `slaybot_hotspot` (Raspberry Pi)
 

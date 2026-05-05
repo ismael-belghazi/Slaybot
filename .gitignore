@@ -25,6 +25,7 @@ qrcodes/*
 *.swo
 .DS_Store
 .vscode/
+temp.py
 
 # Package metadata
 *.egg-info/

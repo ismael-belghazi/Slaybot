@@ -1,9 +1,10 @@
-version: '3.8'
+version: "3.9"
 
 services:
   db:
     image: postgres:15
     container_name: postgres_restaurant
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -12,8 +13,9 @@ services:
       - "5432:5432"
 
   web:
-    build: ./restaurant_app
+    build: ./restaurant_site
     container_name: restaurant_app
+    restart: unless-stopped
     command: python app.py
     ports:
       - "5000:5000"
@@ -22,23 +24,14 @@ services:
     depends_on:
       - db
     volumes:
-      - ./restaurant_app:/app
+      - ./restaurant_site:/app
     environment:
+      FLASK_APP: app.py
+      FLASK_ENV: development
       POSTGRES_HOST: db
-      HOTSPOT_WS_URL: ws://host.docker.internal:8765
+      HOTSPOT_WS_URL: ${HOTSPOT_WS_URL}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared_tunnel
-    depends_on:
-      - web
-    volumes:
-      - ./cloudflared:/etc/cloudflared
-    environment:
-      - TUNNEL_ORIGIN_CERT=/etc/cloudflared/cert.pem
-    command: tunnel --config /etc/cloudflared/config.yml run restaurant_app
 
 volumes:
   postgres_data:

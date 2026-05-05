@@ -1,64 +1,85 @@
 site_name: SlayBot Documentation
-site_description: Documentation complète et générée automatiquement du projet SlayBot
+site_description: Documentation technique complète du projet SlayBot.
 site_author: MHI-Inc
-repo_name: GitHub/SlayBot
-
-nav:
-  - Accueil: index.md
-  - Architecture: architecture.md
-  - Documentation de déploiement: documentation.md
-  - Installation: installation.md
-  - Modules:
-      - site_commande: site_commande.md
-      - slaybot_apk: slaybot_apk.md
-      - slaybot_hotspot: slaybot_hotspot.md
-      - slaybot_screen: slaybot_screen.md
-      - slaybot_table: slaybot_table.md
-      - slaybot_utilitaire_dev: slaybot_utilitaire_dev.md
-  - API: api.md
-  - Informations:
-      - Contribution: contributing.md
-      - Licence: license.md
-      - Règle de conduite: code_of_conduct.md
-
-plugins:
-  - search
-  - mermaid2
-  - mkdocstrings:
-      handlers:
-        python:
-          setup_commands:
-            - "import sys, os; sys.path.insert(0, os.path.abspath('.'))"
-          options:
-            show_source: false   
-            show_root_heading: true
-            show_category_heading: true
-
-markdown_extensions:
-  - admonition
-  - toc:
-      permalink: true
+repo_name: ismael-belghazi/Slaybot
+repo_url: https://github.com/ismael-belghazi/Slaybot
 
 theme:
   name: material
   language: fr
   palette:
-    scheme: default
-    primary: indigo
-    accent: teal
+    - scheme: slate
+      primary: black
+      accent: green
+      toggle:
+        icon: material/console
+        name: Mode Terminal
+    - scheme: default
+      primary: grey
+      accent: green
+      toggle:
+        icon: material/console-network-outline
+        name: Mode Clair
   font:
     text: Roboto
     code: Roboto Mono
   features:
     - navigation.instant
     - navigation.tabs
+    - navigation.top
     - content.code.copy
     - header.autohide
 
-repo_url: https://github.com/ismael-belghazi/Slaybot
-edit_uri: ""
+nav:
+  - Accueil: index.md
+  - Conception:
+      - Architecture: architecture.md
+      - Installation: installation.md
+      - Déploiement: documentation.md
+  - Modules:
+      - Site Commande: site_commande.md
+      - APK: slaybot_apk.md
+      - Hotspot: slaybot_hotspot.md
+      - Screen: slaybot_screen.md
+      - Table: slaybot_table.md
+      - Utilitaires Dev: slaybot_utilitaire_dev.md
+      - Caméra: slaybot_camera.md
+  - API Reference: api.md
+  - Informations:
+      - Contribution: contributing.md
+      - Licence: license.md
+      - Code de conduite: code_of_conduct.md
 
-extra:
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/ismael-belghazi/Slaybot
+plugins:
+  - search
+  - mermaid2:
+      arguments:
+        theme: 'dark'
+        themeVariables:
+          primaryColor: '#000000'
+          lineColor: '#00ff41'
+          textColor: '#00ff41'
+          fontSize: '16px'
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["."]
+          options:
+            show_source: false
+            show_root_heading: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+
+extra_css:
+  - stylesheets/extra.css

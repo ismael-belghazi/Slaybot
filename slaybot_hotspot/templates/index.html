@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>SLAYBOT | TACTICAL HEALTH</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon initialisé par JS -->
+    <link id="favicon" rel="icon" type="image/x-icon" href="">
+    <style>
+        :root {
+            --neon-green: #00ff41;
+            --dark-green: #003b00;
+            --bg-black: #0a0a0a;
+            --panel-bg: rgba(0, 255, 65, 0.03);
+            --font-main: 'Segoe UI', 'Ubuntu Mono', monospace;
+        }
+
+        body { 
+            background-color: var(--bg-black);
+            color: var(--neon-green);
+            font-family: var(--font-main);
+            margin: 0; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            height: 100vh; overflow: hidden;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* Scanlines & Grain */
+        body::before {
+            content: " ";
+            position: fixed; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 3px, 3px 100%;
+            z-index: 100; pointer-events: none;
+        }
+
+        /* Écran d'initialisation */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-black);
+            z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .boot-text { font-family: 'Ubuntu Mono', monospace; font-size: 1.2rem; margin-top: 20px; }
+
+        .main-frame {
+            position: relative;
+            width: 90vw; max-width: 1000px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            padding: 10px;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.8s ease-out;
+        }
+
+        .main-frame.online { opacity: 1; transform: scale(1); }
+
+        .corner {
+            position: absolute; width: 30px; height: 30px;
+            border: 2px solid var(--neon-green);
+        }
+        .top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            font-size: 0.9rem;
+        }
+
+        .system-display {
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+
+        .module-card {
+            background: var(--panel-bg);
+            border-left: 3px solid var(--neon-green);
+            padding: 20px; position: relative;
+        }
+
+        .label { font-size: 0.65rem; opacity: 0.6; margin-bottom: 8px; display: block; }
+        .value { font-size: 2rem; font-weight: 200; font-family: 'Ubuntu Mono', monospace; display: block; }
+
+        .bar-bg { width: 100%; height: 4px; background: var(--dark-green); margin-top: 15px; }
+        .bar-inner {
+            height: 100%; background: var(--neon-green); width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .status-badge {
+            font-size: 0.7rem; margin-top: 10px;
+            display: flex; justify-content: space-between; opacity: 0.8;
+        }
+
+        .blink { animation: blinker 1s infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        @media (max-width: 750px) { .data-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div id="boot-screen">
+    <div class="boot-text" id="boot-log">INITIALIZING HEALTH_CORE...</div>
+    <div style="width: 200px; height: 2px; background: rgba(0,255,65,0.2); margin-top:10px;">
+        <div id="boot-progress" style="width: 0%; height: 100%; background: var(--neon-green); transition: width 0.2s;"></div>
+    </div>
+</div>
+
+<div class="main-frame" id="main-ui">
+    <div class="corner top-left"></div>
+    <div class="corner top-right"></div>
+    <div class="corner bottom-left"></div>
+    <div class="corner bottom-right"></div>
+
+    <header>
+        <div><span class="blink">●</span> SYSTEM_HEALTH</div>
+        <div style="font-weight: bold; opacity: 0.8;">SLAYBOT // CORE OS 2.1</div>
+        <div id="uptime">UPTIME: 00:00:00</div>
+    </header>
+
+    <div class="system-display">
+        <div class="data-grid">
+            <!-- CPU -->
+            <div class="module-card">
+                <span class="label">// CPU_LOAD</span>
+                <span id="cpu_usage_text" class="value">--%</span>
+                <div class="bar-bg"><div id="cpu_bar" class="bar-inner"></div></div>
+                <div class="status-badge">
+                    <span>TEMP:</span> <span id="cpu_temp">--°C</span>
+                </div>
+            </div>
+
+            <!-- RAM -->
+            <div class="module-card">
+                <span class="label">// MEM_BUFFER</span>
+                <span id="ram_usage_text" class="value">--%</span>
+                <div class="bar-bg"><div id="ram_bar" class="bar-inner"></div></div>
+                <div class="status-badge">
+                    <span>STATE:</span> <span id="ram_stat">CHECKING</span>
+                </div>
+            </div>
+
+            <!-- NET -->
+            <div class="module-card">
+                <span class="label">// SIGNAL_STRENGTH</span>
+                <span id="inet_signal" class="value">--%</span>
+                <div class="bar-bg"><div id="net_bar" class="bar-inner"></div></div>
+                <div class="status-badge">
+                    <span id="inet_ssid">RECHERCHE...</span> <span id="ap_status">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="padding: 15px 20px; font-size: 0.7rem; opacity: 0.5; border-top: 1px solid rgba(0, 255, 65, 0.1);">
+        > DIAGNOSTIC_MODE: ACTIVE // TELEMETRY_STREAM_CONNECTED
+    </footer>
+</div>
+
+<script>
+    // --- FAVICON ECG DYNAMIQUE ---
+    const canvas = document.createElement('canvas');
+    canvas.width = 32; canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    const favicon = document.getElementById('favicon');
+
+    let offset = 0;
+    function drawFavicon() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 32, 32);
+        
+        ctx.strokeStyle = "#00ff41";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 16);
+        
+        // Dessin de l'onde ECG
+        for (let x = 0; x < 32; x++) {
+            let y = 16;
+            let pos = (x + offset) % 32;
+            if (pos > 10 && pos < 14) y = 16 - (pos - 10) * 4;
+            else if (pos >= 14 && pos < 18) y = 16 + (pos - 14) * 4 - 8;
+            else if (pos >= 18 && pos < 22) y = 16 - (pos - 18) * 2 + 8;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        favicon.href = canvas.toDataURL('image/png');
+        offset += 2;
+        setTimeout(drawFavicon, 100);
+    }
+    drawFavicon();
+
+    // --- SÉQUENCE DE BOOT ---
+    window.onload = () => {
+        const logs = ["LOADING KERNEL...", "MOUNTING TELEMETRY...", "FETCHING SENSORS...", "HEALTH_CORE ONLINE"];
+        let step = 0;
+        const logEl = document.getElementById('boot-log');
+        const progressEl = document.getElementById('boot-progress');
+        
+        const bootInterval = setInterval(() => {
+            if (step < logs.length) {
+                logEl.innerText = logs[step];
+                progressEl.style.width = ((step + 1) / logs.length) * 100 + "%";
+                step++;
+            } else {
+                clearInterval(bootInterval);
+                document.getElementById('boot-screen').style.opacity = "0";
+                setTimeout(() => {
+                    document.getElementById('boot-screen').style.display = "none";
+                    document.getElementById('main-ui').classList.add('online');
+                }, 500);
+            }
+        }, 400);
+    };
+
+    // --- MISE À JOUR DES STATS ---
+    function updateStats() {
+        fetch('/stats')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('cpu_usage_text').innerText = data.cpu_usage + "%";
+                document.getElementById('ram_usage_text').innerText = data.ram_usage + "%";
+                document.getElementById('inet_signal').innerText = data.inet_signal + "%";
+                document.getElementById('cpu_temp').innerText = data.cpu_temp + "°C";
+                document.getElementById('inet_ssid').innerText = data.inet_ssid.slice(0, 12);
+                document.getElementById('ap_status').innerText = data.ap_status;
+
+                document.getElementById('cpu_bar').style.width = data.cpu_usage + "%";
+                document.getElementById('ram_bar').style.width = data.ram_usage + "%";
+                document.getElementById('net_bar').style.width = data.inet_signal + "%";
+
+                if(data.cpu_temp > 65) {
+                    document.getElementById('cpu_temp').style.color = "#ff3e3e";
+                    document.getElementById('cpu_temp').classList.add('blink');
+                } else {
+                    document.getElementById('cpu_temp').style.color = "var(--neon-green)";
+                    document.getElementById('cpu_temp').classList.remove('blink');
+                }
+                document.getElementById('ram_stat').innerText = data.ram_usage > 85 ? "WARNING" : "OPTIMAL";
+            })
+            .catch(() => { document.getElementById('ap_status').innerText = "DISCONNECTED"; });
+    }
+
+    let seconds = 0;
+    setInterval(() => {
+        seconds++;
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('uptime').innerText = `UPTIME: ${h}:${m}:${s}`;
+    }, 1000);
+
+    setInterval(updateStats, 3000);
+    updateStats();
+</script>
+
+</body>
+</html>

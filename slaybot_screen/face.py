@@ -1,146 +1,326 @@
+import tkinter as tk
 import asyncio
+import threading
 import websockets
-import socket
-import os
+import random
+import time
+import math
 
-# ---------------- CONFIG ----------------
-HOST = "0.0.0.0"
+# --- CONFIGURATION ---
+SERVER_IP = "10.42.0.1"
 PORT = 8765
+ADMIN_PASSWORD = "2403"
+VERSION = "v4.1-MHI-INC"
 
-BASE_DIR = "/home/hotspot/Documents/slaybot_hotspot"
-PILOTE_PATH = os.path.join(BASE_DIR, "pilote.py")
+class SlayBotTactical:
+    def __init__(self, root):
+        self.root = root
+        self.root.title(f"SLAYBOT_OS_{VERSION}")
+        
+        # --- Fullscreen Terminal Mode ---
+        self.root.configure(bg="#000500")
+        self.root.overrideredirect(True)
+        self.w = self.root.winfo_screenwidth()
+        self.h = self.root.winfo_screenheight()
+        self.root.geometry(f"{self.w}x{self.h}+0+0")
+        self.root.attributes("-topmost", True)
+        self.root.config(cursor="none")
+        self.frame_count = 0
+        self.pulse_val=0
+        self.pulse_dir=1
+        # System State
+        self.ws = None
+        self.loop = None # Sera défini dans start_network
+        self.connected = False
+        self.state = "booting"
+        self.boot_logs = []
+        self.boot_progress = 0
+        self.eye_height = 1.0
 
-clients_actifs = set()
-process_en_cours = None 
-lock = asyncio.Lock()  # Sécurité anti-conflit moteurs
+        self.canvas = tk.Canvas(root, bg="#000500", highlightthickness=0, bd=0)
+        self.canvas.pack(fill="both", expand=True)
 
-# ---------------- BROADCAST ----------------
-async def broadcast(message):
-    if clients_actifs:
-        print(f"[BROADCAST] {message}")
-        # On utilise asyncio.gather pour envoyer à tout le monde en parallèle
-        await asyncio.gather(*(c.send(message) for c in clients_actifs), return_exceptions=True)
+        # Lancement des processus
+        threading.Thread(target=self.run_boot, daemon=True).start()
+        
+        # Bindings
+        self.canvas.bind("<Button-1>", self.handle_click)
+        
+        self.update_ui()
+        self.blink_logic()
 
-# ---------------- GESTION PROCESS ----------------
-async def run_process(*args):
-    global process_en_cours
-    async with lock:
-        try:
-            process_en_cours = await asyncio.create_subprocess_exec(
-                *args,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+    # --- LOGIQUE DE BOOT (COMPLÈTE) ---
+    def run_boot(self):
+        # Phase 1 : Le boot qui va crash
+        log_msgs_1 = [
+            "INITIALIZING KERNEL_V4.2...",
+            "CHECKING RAM_INTEGRITY... OK",
+            "LOADING NEURAL_DRIVERS... DONE",
+            "MOUNTING /DEV/SERIAL_0... OK",
+            "BYPASSING SECURITY_PROTOCOL... DONE",
+            "ERROR: MODULE_BERCHE DETECTED",
+            "ENABLING TACTICAL_HUD_V3...",
+            "DELETING MODULE_BERCHE... [OK]",
+            "CRITICAL ERROR: BLUE BUTTON PRESSED BY USER:Marie",
+            "REBOOTING SYSTEM..."
+        ]
+
+        for msg in log_msgs_1:
+            self.boot_logs.append(f"[SYS] {msg}")
+            if len(self.boot_logs) > 8: self.boot_logs.pop(0)
+            speed = random.uniform(0.04, 0.12)
+            for _ in range(10):
+                self.boot_progress += 0.5
+                time.sleep(speed)
+            
+            if "REBOOTING" in msg:
+                time.sleep(1)
+                self.boot_logs = []
+                self.boot_progress = 0
+                time.sleep(1.5)
+                break
+
+        # Phase 2 : Recovery
+        self.boot_logs.append("[!] RECOVERY MODE ACTIVE")
+        log_msgs_2 = [
+            "RE-SYNCING SERVO_MOTORS...",
+            "RE-ESTABLISHING CORE_LINK...",
+            "SCANNING FOR CORE_SERVER..."
+        ]
+
+        for msg in log_msgs_2:
+            self.boot_logs.append(f"[SYS] {msg}")
+            for _ in range(10):
+                self.boot_progress += 2.5
+                time.sleep(0.04)
+
+        time.sleep(1.5)
+        self.boot_progress = 100
+        self.boot_logs.append("[!] BOOT COMPLETE. STARTING OS...")
+        time.sleep(1)
+        self.state = "idle"
+
+    # --- GESTION RÉSEAU ---
+    async def listen(self):
+            uri = f"ws://{SERVER_IP}:{PORT}"
+            while True:
+                try:
+                    async with websockets.connect(uri) as ws:
+                        self.ws = ws
+                        self.connected = True
+                        await ws.send("STATUS/TACTICAL_CONNECTED")
+                        async for msg in ws:
+                            m = msg.lower()
+                            print(f"Received: {m}") 
+
+                            # Correction des conditions de détection
+                            if "go/table" in m or "clean/table" in m or "statut: deplacement" in m:
+                                self.state = "moving"
+                                                        
+                            elif "arrived" in m or "arrivé" in m:
+                                    if "bar" in m:
+                                        self.state = "idle" 
+                                    else:
+                                        self.state = "arrived" 
+                            elif "emergency" in m:
+                                            self.state = "emergency"
+                                
+                except Exception as e:
+                    print(f"Erreur connexion: {e}")
+                    self.connected = False
+                    self.ws = None
+                    await asyncio.sleep(2)
+
+    def start_network(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_until_complete(self.listen())
+
+
+    def emergency_shutdown(self):
+        if self.ws and self.loop:
+            asyncio.run_coroutine_threadsafe(
+                self.ws.send("[WARNING] !!! EMERGENCY STOP !!!"), 
+                self.loop
             )
-            stdout, stderr = await process_en_cours.communicate()
-            code = process_en_cours.returncode
-            process_en_cours = None
-            return code, stdout.decode(), stderr.decode()
-        except Exception as e:
-            process_en_cours = None
-            print(f"[PROCESS ERROR] {e}")
-            return -1, "", str(e)
+        self.trigger_emergency_ui()
 
-# ---------------- COMMANDES ROBOT ----------------
-async def move_robot(target_type, target_id=None):
-    """ Centralise les appels vers pilote.py et gère l'enchaînement """
-    if target_type == "table":
-        print(f"[ROBOT] En route vers Table {target_id}")
-        # CORRECTION : On envoie exactement ce que l'UI Tkinter attend
-        await broadcast(f"order/table/{target_id}") 
-        code, out, err = await run_process("python3", PILOTE_PATH, "table", str(target_id))
-        msg_suffix = f"table/{target_id}"
-    else:
-        print("[ROBOT] Retour au BAR")
-        await broadcast("go/bar")
-        code, out, err = await run_process("python3", PILOTE_PATH, "bar")
-        msg_suffix = "bar"
+    def confirm_reception(self):
+            if self.ws and self.loop:
+                asyncio.run_coroutine_threadsafe(
+                    self.ws.send("status/received"), 
+                    self.loop
+                )
+            self.state = "idle" 
+            
+    def handle_click(self, event):
+            # On définit le scale ici aussi pour que les calculs de collision fonctionnent
+            scale = self.h / 1000 
+            if self.state == "emergency":
+                self.state = "idle"
+                print("[SYS] EMERGENCY RESET BY OPERATOR")
+                return
 
-    if code == 0:
-        print(f"[OK] Arrivé : {msg_suffix}")
-        await broadcast(f"arrived/{msg_suffix}")
-    else:
-        print(f"[ERROR] {err}")
-        # En cas d'erreur physique, on avertit l'UI
-        await broadcast(f"status/emergency_stop")
+            # Bouton Paramètres (Bas Droite)
+            if event.x > self.w - 100 and event.y > self.h - 100:
+                self.show_numpad()
+                
+            # Bouton Arrêt Urgence (Haut Droite)
+            elif event.x > self.w - 120 and event.y < 80:
+                self.state = "emergency"
+                if self.ws:
+                    asyncio.run_coroutine_threadsafe(self.ws.send("emergency_stop"), self.loop)
+            
+            # Bouton Réception (Zone Mallette / Bouton Tactique)
+            elif self.state == "arrived":
+                cx, cy = self.w/2, self.h/2
+                my = cy + 150 * scale
+                bw, bh = 240 * scale, 70 * scale # Doit être identique à draw_face
+            if cx-bw < event.x < cx+bw and my+20 < event.y < my+20+bh:
+                self.confirm_reception()
 
-# ---------------- EMERGENCY STOP ----------------
-async def emergency_stop():
-    global process_en_cours
-    print("[EMERGENCY] STOP !")
-    if process_en_cours and process_en_cours.returncode is None:
+    def show_numpad(self):
+        self.root.config(cursor="arrow")
+        win = tk.Toplevel(self.root)
+        win.geometry("300x450")
+        win.configure(bg="#000")
+        win.overrideredirect(True)
+        win.geometry(f"+{int(self.w/2-150)}+{int(self.h/2-225)}")
+        
+        entry_var = tk.StringVar()
+        tk.Label(win, textvariable=entry_var, font=("Courier", 24), bg="#000", fg="#0f0").pack(pady=10)
+        
+        def press(k):
+            if k == 'EXIT': win.destroy(); self.root.config(cursor="none")
+            elif k == 'OFF' and entry_var.get() == ADMIN_PASSWORD: self.root.destroy()
+            elif k == 'C': entry_var.set("")
+            else: entry_var.set(entry_var.get() + k)
+
+        frame = tk.Frame(win, bg="#000")
+        frame.pack()
+        btns = ['7','8','9','4','5','6','1','2','3','C','0','OFF']
+        for i, b in enumerate(btns):
+            tk.Button(frame, text=b, width=5, height=2, bg="#001100", fg="#0f0", font=("Courier", 12, "bold"),
+                      command=lambda x=b: press(x)).grid(row=i//3, column=i%3, padx=5, pady=5)
+        
+        tk.Button(win, text="[ CLOSE UI ]", bg="#300", fg="red", command=lambda: press('EXIT')).pack(fill="x", pady=10)
+
+    # --- DESSIN & UI ---
+    def update_ui(self):
         try:
-            process_en_cours.terminate()
-        except:
-            pass
-        process_en_cours = None
-    
-    # On envoie le signal d'arrêt à toutes les interfaces
-    await broadcast("status/emergency_stop")
+            self.canvas.delete("all")
+            self.frame_count += 1 # Incrémentation pour les calculs mathématiques
+            cx, cy = self.w/2, self.h/2
 
-# ---------------- HANDLER ----------------
-async def handler(websocket):
-    clients_actifs.add(websocket)
-    print(f"[CONNEXION] Nouveau client. Total : {len(clients_actifs)}")
-    try:
-        async for message in websocket:
-            msg = message.strip().lower()
-            print(f"[RX] {msg}")
+            # Détermination de la couleur globale
+            main_color = "#0f0" if (self.connected and self.state != "emergency") else "#f00"
 
-            # 1. DÉPLACEMENTS (Ordres de l'APK ou Auto)
-            if msg.startswith("go/table/"):
-                table_id = msg.split("/")[-1]
-                asyncio.create_task(move_robot("table", table_id))
+            # 1. Scanlines CRT (Fond)
+            for i in range(0, self.h, 4):
+                self.canvas.create_line(0, i, self.w, i, fill="#000700")
 
-            elif msg == "go/bar":
-                asyncio.create_task(move_robot("bar"))
+            # 2. Effet Radar
+            scan_y = (self.frame_count * 5) % self.h
+            self.canvas.create_line(0, scan_y, self.w, scan_y, fill="#003300", width=2)
 
-            elif msg == "status/emergency_stop": # Match avec l'envoi de l'UI
-                await emergency_stop()
+            if self.state == "booting":
+                self.draw_boot_screen(cx, cy)
+            else:
+                self.draw_tactical_hud(cx, cy)
+                # ON PASSE main_color ICI
+                self.draw_face(cx, cy, main_color)
+                self.draw_tactical_buttons()
 
-            # 2. LOGIQUE DE CONFIRMATION (Bouton vert sur le Robot)
-            elif msg == "status/received":
-                print("[LOGIC] Client a cliqué sur confirmer, retour bar...")
-                # On informe tout le monde que c'est reçu
-                await broadcast("status/received")
-                await asyncio.sleep(2)
-                asyncio.create_task(move_robot("bar"))
+        except Exception as e:
+            print(f"UI DRAW ERROR: {e}")
+        
+        self.root.after(16, self.update_ui)
 
-            # 3. SYNCHRONISATION & RELAIS (Site Web / APK)
-            elif msg.startswith("order/table/") or msg.startswith("clean/table/"):
-                await broadcast(msg)
+    def draw_boot_screen(self, cx, cy):
+        self.canvas.create_text(cx, cy-120, text="--- SLAYBOT MIL-SPEC BOOT ---", fill="#0f0", font=("Courier", 20, "bold"))
+        self.canvas.create_rectangle(cx-200, cy-20, cx+200, cy, outline="#0f0")
+        self.canvas.create_rectangle(cx-200, cy-20, cx-200 + (4*self.boot_progress), cy, fill="#0f0")
+        for i, log in enumerate(self.boot_logs):
+            self.canvas.create_text(cx, cy+50+(i*20), text=log, fill="#0f0", font=("Courier", 10))
 
-            elif any(x in msg for x in ["ready/", "paid/", "cancel/", "status/"]):
-                await broadcast(msg)
+    def draw_tactical_hud(self, cx, cy):
+        color = "#0f0" if (self.connected and self.state != "emergency") else "#f00"
+        d, s = 200, 40
+        # Coins de visée
+        self.canvas.create_line(cx-d, cy-d, cx-d+s, cy-d, fill=color, width=2)
+        self.canvas.create_line(cx-d, cy-d, cx-d, cy-d+s, fill=color, width=2)
+        self.canvas.create_line(cx+d, cy+d, cx+d-s, cy+d, fill=color, width=2)
+        self.canvas.create_line(cx+d, cy+d, cx+d, cy+d-s, fill=color, width=2)
+        
+        status = "CORE_LINK: STABLE" if self.connected else "CORE_LINK: LOST - ANGRY_MODE"
+        if self.state == "emergency": status = "CRITICAL: EMERGENCY_STOP_ACTIVE"
+        
+        self.canvas.create_text(20, self.h-30, text=f"> {status} | {self.state.upper()} | {VERSION}", fill=color, anchor="w", font=("Courier", 12))
 
-            elif msg == "arrived/table": # Si le pilote simule l'arrivée
-                 await broadcast("arrived/table")
+    def draw_face(self, cx, cy, color):
+        s = self.h / 1000 
+        glow_color = "#001a00" if color == "#0f0" else "#1a0000"
+        
+        # --- 1. LE NOEUD PAPILLON ---
+        bx, by = cx, cy + 240 * s
+        bw, bh = 50 * s, 28 * s
+        self.canvas.create_polygon(bx, by, bx-bw, by-bh, bx-bw, by+bh, outline=color, fill="#000500", width=2)
+        self.canvas.create_polygon(bx, by, bx+bw, by-bh, bx+bw, by+bh, outline=color, fill="#000500", width=2)
+        self.canvas.create_rectangle(bx-8*s, by-8*s, bx+8*s, by+8*s, outline=color, fill=color)
 
-    except websockets.exceptions.ConnectionClosed:
-        pass
-    finally:
-        clients_actifs.discard(websocket)
-        print(f"[DECONNEXION] Client parti. Reste : {len(clients_actifs)}")
+        # --- 2. EXPRESSIONS ---
+        if self.state == "moving":
+            mouth_curve, eyebrow_lift = 0.5, -12 * s
+        elif self.state == "emergency" or not self.connected:
+            mouth_curve, eyebrow_lift = -1.2, -25 * s
+        elif self.state == "arrived":
+            mouth_curve, eyebrow_lift = 1.8, 15 * s
+        else:
+            mouth_curve, eyebrow_lift = 0.2, 0
 
-# ---------------- IP & MAIN ----------------
-def get_local_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
-    except: return "127.0.0.1"
-    finally: s.close()
+        # --- 3. LES YEUX ---
+        for side in [-1, 1]:
+            ex = cx + (side * 160 * s)
+            ey = cy - 40 * s + eyebrow_lift
+            h = 80 * s * self.eye_height
+            self.canvas.create_oval(ex-65*s, ey-h-5, ex+65*s, ey+h+5, outline=glow_color, width=2)
+            self.canvas.create_oval(ex-60*s, ey-h, ex+60*s, ey+h, outline=color, width=4)
+            
+            if self.eye_height > 0.5:
+                # Utilisation de frame_count pour le balayage du regard
+                px = math.sin(self.frame_count * 0.05) * 10 * s if self.state == "idle" else 0
+                self.canvas.create_oval(ex-15*s+px, ey-15*s, ex+15*s+px, ey+15*s, fill=color)
 
-async def main():
-    ip = get_local_ip()
-    print("========================================")
-    print(f"  SLAYBOT SERVER : ONLINE")
-    print(f"  ADRESSE : ws://{ip}:{PORT}")
-    print("========================================")
-    async with websockets.serve(handler, HOST, PORT):
-        await asyncio.Future() # Maintient le serveur ouvert
+        # --- 4. LA BOUCHE ---
+        my = cy + 150 * s
+        if self.state == "arrived":
+            bw_btn, bh_btn = 240 * s, 70 * s
+            self.canvas.create_rectangle(cx-bw_btn, my, cx+bw_btn, my+bh_btn, outline=color, width=4, fill="#000800")
+            self.canvas.create_text(cx, my+bh_btn/2, text=">> CONFIRM SYSTEM <<", fill=color, font=("Courier", int(18*s), "bold"))
+        else:
+            mw = 90 * s
+            ctrl_y = my + (mouth_curve * 40 * s)
+            self.canvas.create_line(cx-mw, my, cx, ctrl_y, cx+mw, my, fill=color, width=6, smooth=True, capstyle="round")
+            
+    def draw_tactical_buttons(self):
+        # Bouton Paramètres (CMD)
+        self.canvas.create_rectangle(self.w-70, self.h-70, self.w-20, self.h-20, outline="#0f0", width=2)
+        self.canvas.create_text(self.w-45, self.h-45, text="CMD", fill="#0f0", font=("Courier", 10, "bold"))
+        
+        # Bouton Arrêt Urgence (KILL_SW)
+        self.canvas.create_rectangle(self.w-110, 20, self.w-20, 70, outline="red", width=2)
+        self.canvas.create_text(self.w-65, 45, text="KILL_SW", fill="red", font=("Courier", 10, "bold"))
 
+    def blink_logic(self):
+        if self.state != "booting" and self.state != "emergency":
+            self.eye_height = 0.1
+            self.root.after(150, lambda: setattr(self, 'eye_height', 1.0))
+        self.root.after(random.randint(3000, 6000), self.blink_logic)
+
+# --- EXECUTION ---
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n[STOP] Serveur arrêté manuellement.")
+    root = tk.Tk()
+    app = SlayBotTactical(root)
+    # Lancement du réseau dans un thread séparé avec gestion de la loop
+    threading.Thread(target=app.start_network, daemon=True).start()
+    root.mainloop()

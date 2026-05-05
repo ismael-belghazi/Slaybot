@@ -17,35 +17,31 @@ Modules documentés
 
 Chaque module correspond à un composant du système SlayBot.
 
-slaybot_apk
+:::slaybot_apk
 
 Application Android principale.
 
-:::
+:::slaybot_camera
 
-slaybot_hotspot
+Système de vision par ordinateur pour navigation autonome.
+
+:::slaybot_hotspot
 
 Gestion du serveur central et des communications réseau.
 
-:::
+:::slaybot_screen
 
-slaybot_screen
+Gestion de l'affichage et de l'interface visuelle.
 
-Gestion de l’affichage et de l’interface visuelle.
-
-:::
-
-slaybot_table
+:::slaybot_table
 
 Logique embarquée pour la table (ESP32).
 
-:::
-
-slaybot_utilitaire_dev
+:::slaybot_utilitaire_dev
 
 Outils de simulation et de développement.
 
-:::
+:::slaybot_utilitaire_dev
 
 Utilisation
 Lancer le serveur de documentation en local
