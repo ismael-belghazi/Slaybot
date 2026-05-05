@@ -65,7 +65,6 @@ plugins:
         python:
           paths: ["."]
           options:
-            inventory_enabled: false
             show_source: false
             show_root_heading: true
 
