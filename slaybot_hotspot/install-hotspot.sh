@@ -1,5 +1,5 @@
 #!/bin/bash
-# --- SLAYBOT NETWORK SHIELD - V12 "Cristal Version") ---
+# --- SLAYBOT NETWORK SHIELD - V11.8 ULTIMATE (OPTIMISÉ IP FIXE) ---
 set -e
 
 # --- CONFIGURATION ---
@@ -29,7 +29,7 @@ fi
 mkdir -p "$LOG_DIR"
 
 echo "======================================================="
-echo "       SLAYBOT OS - V12 "Cristal Version"              "
+echo "       SLAYBOT OS - V11.8 "Radio Silence"              "
 echo "======================================================="
 echo "Mode : AP=$WIFI_AP | INET=$WIFI_INET"
 echo "0: Reset Total & Installation Stable (FIXE 137.60)"
@@ -80,6 +80,7 @@ install_hotspot() {
         wifi.mode ap wifi.band bg wifi.channel 11 \
         wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$HOTSPOT_PWD" \
         wifi-sec.proto rsn wifi-sec.group ccmp wifi-sec.pairwise ccmp \
+        wifi-sec.pmf 1 \
         ipv4.method shared ipv4.addresses 10.42.0.1/24 ipv4.never-default true
 
     echo "[4/6] Séquençage Chronométré (Critique)..."
@@ -120,6 +121,7 @@ install_hotspot() {
 setup_python_env() {
     echo "[5/6] Configuration Réseau & Environnement Python..."
 
+    # 1. Configuration DNS (Spécial UPJV / Partage Windows)
     # On déverrouille au cas où, on écrit, puis on verrouille
     sudo chattr -i /etc/resolv.conf 2>/dev/null
     sudo tee /etc/resolv.conf <<EOF > /dev/null
@@ -128,6 +130,7 @@ nameserver 193.49.184.17
 nameserver 10.0.0.1
 search u-picardie.fr
 EOF
+    # On verrouille pour éviter que NetworkManager n'écrase tout pendant l'install
     sudo chattr +i /etc/resolv.conf 2>/dev/null
 
     # 2. Forçage de la route vers le PC
@@ -143,7 +146,7 @@ EOF
         --trusted-host files.pythonhosted.org \
         --trusted-host pypi.python.org \
         --timeout 120 \
-        flask psutil websockets
+        flask psutil websockets spidev
 }
 create_robot_service() {
     sudo bash -c "cat > /etc/systemd/system/robot.service << EOF
@@ -183,39 +186,50 @@ EOF"
 }
 
 create_services() {
-    cat > "$WATCHDOG_SCRIPT" << EOF
+    cat > "$WATCHDOG_SCRIPT" << 'EOF'
 #!/bin/bash
-# Attente du démarrage complet
-sleep 10
+echo "--- SHIELD WATCHDOG INTELLIGENT ACTIVÉ ---"
 while true; do
-    # Force la désactivation de l'économie d'énergie (évite le bug du mot de passe)
-    iw dev "$WIFI_AP" set power_save off >/dev/null 2>&1 || true
-    
-    # Vérifie et remonte les connexions si besoin
-    nmcli con up "$INET_ID" >/dev/null 2>&1 || true
-    nmcli con up "$HOTSPOT_SSID" >/dev/null 2>&1 || true
-    
-    sleep 60
+    # 1. Empêcher la veille Wi-Fi
+    iw dev wlan0 set power_save off >/dev/null 2>&1
+
+    # 2. On ne relance Slaybot QUE s'il n'est pas actif
+    if ! nmcli -t -f ACTIVE,NAME connection show --active | grep -q "^yes:Slaybot"; then
+        echo "RÉPARATION: Relance du Hotspot Slaybot..."
+        nmcli connection up "Slaybot" >/dev/null 2>&1
+    fi
+
+    # 3. On ne relance le lien PC QUE s'il n'est pas actif
+    if ! nmcli -t -f ACTIVE,NAME connection show --active | grep -q "^yes:pc-link-internet"; then
+        echo "RÉPARATION: Relance du lien PC (wlan1)..."
+        nmcli connection up "pc-link-internet" >/dev/null 2>&1
+    fi
+
+    sleep 10
 done
 EOF
-EOF
+
     chmod +x "$WATCHDOG_SCRIPT"
 
     sudo bash -c "cat > /etc/systemd/system/slaybot-net.service << EOF
 [Unit]
 Description=Slaybot Network Watchdog
 After=NetworkManager.service
+
 [Service]
 ExecStart=/bin/bash $WATCHDOG_SCRIPT
 Restart=always
 RestartSec=20
+
 [Install]
 WantedBy=multi-user.target
 EOF"
+
+    # 4. Activation du service
     sudo systemctl daemon-reload
     sudo systemctl enable --now slaybot-net.service
+    sudo systemctl restart slaybot-net.service
 }
-
 case "$CHOICE" in
     0) install_hotspot ;;
     1) 

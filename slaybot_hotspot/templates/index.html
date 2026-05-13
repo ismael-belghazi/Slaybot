@@ -4,7 +4,6 @@
     <title>SLAYBOT | TACTICAL HEALTH</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Favicon initialisé par JS -->
     <link id="favicon" rel="icon" type="image/x-icon" href="">
     <style>
         :root {
@@ -13,6 +12,7 @@
             --bg-black: #0a0a0a;
             --panel-bg: rgba(0, 255, 65, 0.03);
             --font-main: 'Segoe UI', 'Ubuntu Mono', monospace;
+            --warning-orange: #ffaa00;
         }
 
         body { 
@@ -25,7 +25,6 @@
             text-transform: uppercase; letter-spacing: 1px;
         }
 
-        /* Scanlines & Grain */
         body::before {
             content: " ";
             position: fixed; top: 0; left: 0; bottom: 0; right: 0;
@@ -35,7 +34,6 @@
             z-index: 100; pointer-events: none;
         }
 
-        /* Écran d'initialisation */
         #boot-screen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -77,7 +75,7 @@
         }
 
         .system-display {
-            padding: 40px 20px;
+            padding: 20px;
             background: rgba(0, 0, 0, 0.4);
             display: flex; flex-direction: column; gap: 20px;
         }
@@ -104,6 +102,18 @@
             font-size: 0.7rem; margin-top: 10px;
             display: flex; justify-content: space-between; opacity: 0.8;
         }
+
+        .cell-block {
+            border: 1px solid var(--neon-green);
+            height: 30px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem; transition: all 0.5s;
+        }
+        .voltage-row {
+            display: flex; justify-content: space-between; font-family: 'Ubuntu Mono';
+            font-size: 0.8rem; margin-bottom: 4px; border-bottom: 1px dotted rgba(0,255,65,0.1);
+        }
+        .critical { background: rgba(255, 62, 62, 0.3); border-color: #ff3e3e; color: #ff3e3e; animation: blinker 0.5s infinite; }
+        .nominal { background: rgba(0, 255, 65, 0.1); }
 
         .blink { animation: blinker 1s infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
@@ -134,7 +144,6 @@
 
     <div class="system-display">
         <div class="data-grid">
-            <!-- CPU -->
             <div class="module-card">
                 <span class="label">// CPU_LOAD</span>
                 <span id="cpu_usage_text" class="value">--%</span>
@@ -144,7 +153,6 @@
                 </div>
             </div>
 
-            <!-- RAM -->
             <div class="module-card">
                 <span class="label">// MEM_BUFFER</span>
                 <span id="ram_usage_text" class="value">--%</span>
@@ -154,13 +162,39 @@
                 </div>
             </div>
 
-            <!-- NET -->
             <div class="module-card">
                 <span class="label">// SIGNAL_STRENGTH</span>
                 <span id="inet_signal" class="value">--%</span>
                 <div class="bar-bg"><div id="net_bar" class="bar-inner"></div></div>
                 <div class="status-badge">
                     <span id="inet_ssid">RECHERCHE...</span> <span id="ap_status">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOC BATTERIE TACTIQUE -->
+        <div class="module-card" style="border-left: 3px solid var(--warning-orange); background: rgba(255, 170, 0, 0.02);">
+            <span class="label" style="color: var(--warning-orange);">// LIPO_4S_STABILIZATION_UNIT (3800MAH 20C)</span>
+            <div style="display: flex; align-items: center; justify-content: space-around; padding: 10px;">
+                <!-- Robot Schematic -->
+                <div style="position: relative; width: 100px; height: 120px; border: 1px solid rgba(0, 255, 65, 0.2); border-radius: 5px;">
+                    <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); width: 20px; height: 5px; background: var(--neon-green); opacity: 0.3;"></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 15px 10px;">
+                        <div id="c0_box" class="cell-block">C1</div>
+                        <div id="c1_box" class="cell-block">C2</div>
+                        <div id="c2_box" class="cell-block">C3</div>
+                        <div id="c3_box" class="cell-block">C4</div>
+                    </div>
+                </div>
+                <div style="flex-grow: 1; margin-left: 40px;">
+                    <div class="voltage-row"><span>CELL_01</span> <strong id="v0">--V</strong></div>
+                    <div class="voltage-row"><span>CELL_02</span> <strong id="v1">--V</strong></div>
+                    <div class="voltage-row"><span>CELL_03</span> <strong id="v2">--V</strong></div>
+                    <div class="voltage-row"><span>CELL_04</span> <strong id="v3">--V</strong></div>
+                    <div style="margin-top: 10px; border-top: 1px solid rgba(255,170,0,0.3); padding-top: 5px;">
+                        <span class="label">TOTAL_OUTPUT</span>
+                        <span id="v_total" style="font-size: 1.8rem; font-family: 'Ubuntu Mono'; color: var(--warning-orange);">--V</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -177,18 +211,14 @@
     canvas.width = 32; canvas.height = 32;
     const ctx = canvas.getContext('2d');
     const favicon = document.getElementById('favicon');
-
     let offset = 0;
     function drawFavicon() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, 32, 32);
-        
         ctx.strokeStyle = "#00ff41";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(0, 16);
-        
-        // Dessin de l'onde ECG
         for (let x = 0; x < 32; x++) {
             let y = 16;
             let pos = (x + offset) % 32;
@@ -206,11 +236,10 @@
 
     // --- SÉQUENCE DE BOOT ---
     window.onload = () => {
-        const logs = ["LOADING KERNEL...", "MOUNTING TELEMETRY...", "FETCHING SENSORS...", "HEALTH_CORE ONLINE"];
+        const logs = ["LOADING KERNEL...", "MOUNTING TELEMETRY...", "MCP3008_INIT...", "HEALTH_CORE ONLINE"];
         let step = 0;
         const logEl = document.getElementById('boot-log');
         const progressEl = document.getElementById('boot-progress');
-        
         const bootInterval = setInterval(() => {
             if (step < logs.length) {
                 logEl.innerText = logs[step];
@@ -243,6 +272,21 @@
                 document.getElementById('ram_bar').style.width = data.ram_usage + "%";
                 document.getElementById('net_bar').style.width = data.inet_signal + "%";
 
+                if (data.cells) {
+                    let totalV = 0;
+                    data.cells.forEach((v, i) => {
+                        totalV += v;
+                        document.getElementById(`v${i}`).innerText = v + "V";
+                        const box = document.getElementById(`c${i}_box`);
+                        if (v < 3.4) {
+                            box.className = "cell-block critical";
+                        } else {
+                            box.className = "cell-block nominal";
+                        }
+                    });
+                    document.getElementById('v_total').innerText = totalV.toFixed(2) + "V";
+                }
+
                 if(data.cpu_temp > 65) {
                     document.getElementById('cpu_temp').style.color = "#ff3e3e";
                     document.getElementById('cpu_temp').classList.add('blink');
@@ -267,6 +311,5 @@
     setInterval(updateStats, 3000);
     updateStats();
 </script>
-
 </body>
 </html>
